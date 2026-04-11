@@ -1,0 +1,85 @@
+site_name: pycommence
+site_description: Clean Python library for Commence database CRUD & schema introspection via COM automation.
+site_url: https://pawrequest.github.io/pycommence-vibes/
+repo_url: https://github.com/pawrequest/pycommence-vibes
+repo_name: pawrequest/pycommence
+docs_dir: docs_src
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - content.code.annotate
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - toc.follow
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            heading_level: 2
+            members_order: source
+            docstring_style: google
+            merge_init_into_class: true
+            show_signature_annotations: true
+            separate_signature: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - User Guide:
+      - Architecture: architecture.md
+      - Query & Filtering: querying.md
+      - Connections: connections.md
+      - DDE Operations: dde.md
+      - Canonical Mode: canonical.md
+  - API Reference:
+      - CommenceSession: api/session.md
+      - QueryBuilder: api/query.md
+      - Services:
+          - SchemaService: api/schema.md
+          - ConnectionService: api/connections.md
+          - DdeService: api/dde.md
+      - Models: api/models.md
+      - Exceptions: api/exceptions.md
+  - FAQ / Troubleshooting: faq.md
+  - Changelog: changelog.md
+

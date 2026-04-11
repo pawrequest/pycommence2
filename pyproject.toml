@@ -1,0 +1,37 @@
+[project]
+name = "pycommence"
+version = "0.3.0"
+description = "Clean Python library for Commence database CRUD & schema introspection via COM automation."
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "paw", email = "pawrequest@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "pywin32>=306",
+    "platformdirs>=4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/pawrequest/pycommence-vibes"
+Documentation = "https://pawrequest.github.io/pycommence-vibes/"
+Repository = "https://github.com/pawrequest/pycommence-vibes"
+Changelog = "https://github.com/pawrequest/pycommence-vibes/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+cli = ["click>=8.0", "rich>=13.0"]
+gui = ["nicegui>=2.0"]
+dev = ["pytest>=8.0", "ruff>=0.4"]
+docs = ["mkdocs-material>=9.0", "mkdocstrings[python]>=0.25"]
+
+[project.scripts]
+pycommence = "pycommence_vibes.cli:cli"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[build-system]
+requires = ["uv_build>=0.9.2,<0.10.0"]
+build-backend = "uv_build"

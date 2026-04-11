@@ -1,0 +1,228 @@
+# pycommence-vibes
+
+A clean, modern Python library for **Commence database** CRUD operations and schema introspection via COM automation.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│               Your App / CLI / GUI              │
+├─────────────────────────────────────────────────┤
+│              CommenceSession (public API)        │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────┐  │
+│  │  schema   │  │  reader   │  │   writer     │  │
+│  │  service  │  │  service  │  │   service    │  │
+│  └────┬─────┘  └────┬─────┘  └──────┬───────┘  │
+├───────┼──────────────┼───────────────┼──────────┤
+│       │     _com (internal COM layer)│          │
+│  ┌────┴────┐  ┌──────┴───┐  ┌───────┴──────┐   │
+│  │Converse │  │  Cursor   │  │   Rowset     │   │
+│  │ation    │  │  Wrapper  │  │   Wrapper    │   │
+│  └────┬────┘  └────┬─────┘  └──────┬───────┘   │
+├───────┼────────────┼───────────────┼────────────┤
+│       └────── win32com.client (COM) ────────────│
+│                  Commence.DB                    │
+└─────────────────────────────────────────────────┘
+```
+
+**Three layers:**
+- **`_com/`** – Thin wrappers around raw COM objects. Handles COM lifecycle, NULL checks, and error translation.
+- **`services/`** – Business logic: `SchemaService` (introspection via DDE), `ReaderService` (query), `WriterService` (add/edit/delete).
+- **`session.py`** – `CommenceSession`, the single public entry point. Also exposes a fluent `QueryBuilder`.
+
+## Quick Start
+
+```python
+from pycommence import CommenceSession
+
+with CommenceSession() as db:
+    print(f"Connected to: {db.db_name}")
+
+    # --- SCHEMA ---
+    categories = db.schema.list_categories()
+    fields = db.schema.get_fields("Contact")
+
+    # --- READ ---
+    rows = db.read("Contact", columns=["Name", "Email"], max_rows=10)
+    for row in rows:
+        print(row["Name"], row["Email"])
+
+    # Fluent query
+    results = (
+        db.query("Contact")
+        .columns("Name", "Email", "Phone")
+        .where("Name", "Contains", "Smith")
+        .sort("Name")
+        .limit(20)
+        .execute()
+    )
+
+    # --- CREATE ---
+    new_id = db.add("Contact", {"Name": "Jane Doe", "Email": "jane@example.com"})
+
+    # --- UPDATE ---
+    db.edit(new_id, "Contact", {"Email": "jane.doe@example.com"})
+
+    # --- DELETE ---
+    db.delete(new_id, "Contact")
+```
+
+## Schema Introspection
+
+```python
+with CommenceSession() as db:
+    for cat in db.schema.list_categories():
+        print(cat)
+
+    for field in db.schema.get_fields("Contact"):
+        print(f"  {field.name}: {field.field_type.name} "
+              f"(max={field.max_chars}, mandatory={field.is_mandatory})")
+
+    for conn in db.schema.get_connection_names("Contact"):
+        print(f"  {conn.name} → {conn.to_category}")
+```
+
+## Filtering
+
+```python
+with CommenceSession() as db:
+    # Field filter
+    results = db.query("Person").where("Address", "Contains", "NJ").execute()
+
+    # Connection To Item filter
+    results = db.query("Person").where_connection("Is Employed by", "Company", "Acme Corp").execute()
+
+    # Connection To Category Field filter
+    results = db.query("Person").where_connected_field(
+        "Is Employed by", "Company", "State", "Contains", "NJ"
+    ).execute()
+
+    # Raw DDE filter (escape hatch)
+    results = db.query("Person").raw_filter('[ViewFilter(1, F, , "Name", "Contains", "Smith", False)]').execute()
+```
+
+## View Cursors
+
+Query against a saved Commence view, inheriting its built-in filter, sort, and column set:
+
+```python
+with CommenceSession() as db:
+    results = (
+        db.query_view("Active Contacts")
+        .where("City", "Equal To", "Boston")   # layer additional filters
+        .limit(50)
+        .execute()
+    )
+```
+
+## Related Columns
+
+Pull fields from connected items into your query results:
+
+```python
+with CommenceSession() as db:
+    results = (
+        db.query("Person")
+        .columns("Name", "Email")
+        .related_column("Is Employed by", "Company", "Company Name")
+        .related_column("Is Employed by", "Company", "Phone")
+        .execute()
+    )
+    for row in results:
+        print(row["Name"], row["Company Name"])
+```
+
+## Canonical Mode
+
+Return data in a standardised, locale-independent format — dates as `yyyymmdd`, numbers as `123456.78`, checkboxes as `TRUE`/`FALSE`:
+
+```python
+with CommenceSession() as db:
+    rows = db.read("Hire", canonical=True)
+
+    # Or via the query builder
+    results = db.query("Hire").columns("Name", "Booked Date", "Price").canonical().execute()
+```
+
+## DDE Operations
+
+The `DdeService` provides direct DDE commands for operations not covered by the cursor API:
+
+```python
+with CommenceSession() as db:
+    # Read a single field
+    email = db.dde.get_field("Contact", "Jane Doe", "Email")
+
+    # Add/edit/delete by name
+    db.dde.add_item("Contact", "New Person")
+    db.dde.edit_item("Contact", "New Person", "Email", "new@example.com")
+    db.dde.delete_item("Contact", "New Person")
+
+    # UI control
+    db.dde.show_item("Contact", "Jane Doe")
+    db.dde.show_view("Active Contacts")
+
+    # Fire a trigger/agent
+    db.dde.fire_trigger("Nightly Sync")
+```
+
+## Connections
+
+Manage item relationships via DDE:
+
+```python
+with CommenceSession() as db:
+    # Assign a connection
+    db.assign_connection(
+        "Person", "John Smith",
+        "Is Employed by",
+        "Company", "Acme Corp",
+    )
+
+    # Query connected items
+    names = db.connections.get_connected_item_names(
+        "Person", "John Smith",
+        "Is Employed by", "Company",
+    )
+    print(names)  # ["Acme Corp"]
+
+    # Remove a connection
+    db.unassign_connection(
+        "Person", "John Smith",
+        "Is Employed by",
+        "Company", "Acme Corp",
+    )
+```
+
+## Requirements
+
+- **Python 3.13+**
+- **Commence** must be running with a database open
+- **Windows** (COM automation)
+
+## Installation
+
+```bash
+uv add pycommence
+```
+
+## Documentation
+
+Full docs are available at the [MkDocs site](https://pawrequest.github.io/pycommence-vibes/). Build locally:
+
+```bash
+uv pip install -e ".[docs]"
+mkdocs serve
+```
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for the full plan.  In priority order:
+
+1. **Documentation** (v0.2.1) — MkDocs site, CHANGELOG, expanded docstrings
+2. **Packaging & Polish** (v0.2.2) — `py.typed`, schema caching, `RowResult` improvements
+3. **CLI** (v0.3.0) — `click` + `rich` CLI for read/schema/export
+4. **Export / Import** (v0.3.1) — CSV, JSON, Excel export + backup service
+5. **NiceGUI Frontend** (v0.4.0) — Desktop app for browsing, searching, exporting
+6. **Advanced** (v0.5.0) — MCP server, async wrapper, remaining DBAPI surface
+
