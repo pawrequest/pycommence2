@@ -148,6 +148,7 @@ class TestLargeDataReads:
     ) -> None:
         """Read ALL rows but only the PK column — lightweight but tests paging
         over the entire dataset."""
+        print(f'\nBatch Size: {total_rows}')
         rows = session.read(CATEGORY, columns=[pk_field], max_rows=total_rows)
         assert len(rows) == total_rows
         # Every row should have a non-None PK value
@@ -160,6 +161,7 @@ class TestLargeDataReads:
     ) -> None:
         """Read 200 rows with all columns — a realistic page size that can
         blow up if total cell data exceeds COM buffer limits."""
+        print(f'\nBatch Size: 200')
         rows = session.read(CATEGORY, max_rows=200)
         assert len(rows) == 200
 

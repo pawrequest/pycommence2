@@ -132,7 +132,7 @@ RENDERERS = {
 @click.option('-v', '--verbose', is_flag=True, help='Enable debug logging.')
 def cli(verbose: bool) -> None:
     """pycommence — Commence database tools from the command line."""
-    level = logging.DEBUG if verbose else logging.WARNING
+    level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(level=level, format='%(name)s: %(message)s')
 
 
