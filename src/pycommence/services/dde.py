@@ -310,6 +310,193 @@ class DdeService:
         cmd = f'[FireTrigger("{trigger_name}")]'
         self._conv.execute(cmd)
 
+    # -- item marking --------------------------------------------------------
+    def get_mark_item(self, category: str) -> str:
+        """Return the name of the currently marked item in a category via DDE.
+
+        Args:
+            category: Commence category name.
+
+        Returns:
+            The item name string, or empty if no item is marked.
+
+        Example::
+
+            marked = db.dde.get_mark_item("Contact")
+        """
+        cmd = f'[GetMarkItem("{category}")]'
+        return self._conv.request(cmd).rstrip("\n")
+
+    def view_mark_item(
+        self,
+        category: str,
+        item_name: str,
+        *,
+        view_name: str | None = None,
+    ) -> None:
+        """Mark (highlight) an item in a Commence view.
+
+        Args:
+            category: Commence category name.
+            item_name: Item name (primary key) to mark.
+            view_name: Optional view name. If ``None``, uses the active view.
+
+        Raises:
+            ConversationError: If the item or view does not exist.
+
+        Example::
+
+            db.dde.view_mark_item("Contact", "Jane Doe")
+        """
+        if view_name:
+            cmd = f'[ViewMarkItem("{view_name}", "{category}", "{item_name}")]'
+        else:
+            cmd = f'[ViewMarkItem("", "{category}", "{item_name}")]'
+        self._conv.execute(cmd)
+
+    def mark_active_item(self, category: str) -> None:
+        """Mark the currently active item in a category.
+
+        Args:
+            category: Commence category name.
+
+        Example::
+
+            db.dde.mark_active_item("Contact")
+        """
+        cmd = f'[MarkActiveItem("{category}")]'
+        self._conv.execute(cmd)
+
+    # -- view-to-file --------------------------------------------------------
+    def get_view_to_file(
+        self,
+        view_name: str,
+        path: str,
+        file_type: str = "HTML",
+    ) -> None:
+        """Export a view to a file (HTML or text) via DDE.
+
+        Args:
+            view_name: Name of the Commence view.
+            path: Absolute path for the output file.
+            file_type: ``"HTML"`` (default) or ``"Text"``.
+
+        Raises:
+            ConversationError: If the view does not exist.
+
+        Example::
+
+            db.dde.get_view_to_file("Active Contacts", "C:\\\\out\\\\contacts.html")
+        """
+        cmd = f'[GetViewToFile("{view_name}", "{path}", "{file_type}")]'
+        self._conv.execute(cmd)
+
+    # -- merge templates -----------------------------------------------------
+    def merge_template(
+        self,
+        category: str,
+        item_name: str,
+        template_name: str,
+        path: str,
+    ) -> None:
+        """Create a document from a merge template for an item.
+
+        Args:
+            category: Commence category name.
+            item_name: Item name (primary key).
+            template_name: Name of the merge template.
+            path: Output file path for the merged document.
+
+        Raises:
+            ConversationError: If the template or item does not exist.
+
+        Example::
+
+            db.dde.merge_template("Contact", "Jane Doe", "Letter", "C:\\\\out\\\\letter.doc")
+        """
+        cmd = (
+            f'[MergeTemplateCreate("{category}", "{item_name}", '
+            f'"{template_name}", "{path}")]'
+        )
+        self._conv.execute(cmd)
+
+    # -- form script management ----------------------------------------------
+    def check_out_form_script(
+        self,
+        category: str,
+        form_name: str,
+        path: str,
+    ) -> None:
+        """Check out a form script to a local file for editing.
+
+        Args:
+            category: Commence category name.
+            form_name: Name of the form whose script to check out.
+            path: Local file path for the script.
+
+        Raises:
+            ConversationError: If the form does not exist.
+
+        Example::
+
+            db.dde.check_out_form_script("Contact", "Detail Form", "C:\\\\scripts\\\\detail.vbs")
+        """
+        cmd = f'[CheckOutFormScript("{category}", "{form_name}", "{path}")]'
+        self._conv.execute(cmd)
+
+    def check_in_form_script(
+        self,
+        category: str,
+        form_name: str,
+        path: str,
+    ) -> None:
+        """Check in a modified form script from a local file.
+
+        Args:
+            category: Commence category name.
+            form_name: Name of the form whose script to check in.
+            path: Local file path containing the script.
+
+        Raises:
+            ConversationError: If the form does not exist.
+
+        Example::
+
+            db.dde.check_in_form_script("Contact", "Detail Form", "C:\\\\scripts\\\\detail.vbs")
+        """
+        cmd = f'[CheckInFormScript("{category}", "{form_name}", "{path}")]'
+        self._conv.execute(cmd)
+
+    # -- preferences / system info -------------------------------------------
+    def get_preference(self, pref_name: str) -> str:
+        """Return a Commence preference value via DDE.
+
+        Args:
+            pref_name: Preference key (e.g. ``"Me"``).
+
+        Returns:
+            The preference value as a string.
+
+        Example::
+
+            me = db.dde.get_preference("Me")
+        """
+        cmd = f'[GetPreference("{pref_name}")]'
+        return self._conv.request(cmd).rstrip("\n")
+
+    def get_caller_id(self) -> str:
+        """Return the caller-ID for the current session via DDE.
+
+        Returns:
+            The caller ID string.
+
+        Example::
+
+            cid = db.dde.get_caller_id()
+        """
+        cmd = "[GetCallerID()]"
+        return self._conv.request(cmd).rstrip("\n")
+
     # -- database metadata ---------------------------------------------------
     def get_database_definition(self, *, delim: str = "|") -> dict[str, str]:
         """Return high-level database metadata via DDE.

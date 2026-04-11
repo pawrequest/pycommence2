@@ -258,12 +258,12 @@ backup/
 
 ---
 
-## Phase 6 — Advanced Features  `v0.5.0+`
+## Phase 6 — Advanced Features  `v0.5.0+` ✅
 
-### 6.1  MCP server
+### 6.1  MCP server ✅
 Expose `read`, `query`, `schema`, `add`, `edit`, `delete`, `connections` as MCP tools, allowing LLM agents to interact with Commence databases.  New module `src/pycommence/mcp_server.py`.  (There's already an external MCP server — this would be built-in.)
 
-### 6.2  Async wrapper
+### 6.2  Async wrapper ✅
 COM is STA-bound.  Create `AsyncCommenceSession` that dispatches all calls to a dedicated thread via `asyncio.to_thread()`:
 ```python
 async with AsyncCommenceSession() as db:
@@ -271,7 +271,7 @@ async with AsyncCommenceSession() as db:
 ```
 Enables use in async frameworks (FastAPI, NiceGUI's async handlers).
 
-### 6.3  Remaining DBAPI surface
+### 6.3  Remaining DBAPI surface ✅
 Deferred items from PLAN-v0.2.0:
 - Item marking (`GetMarkItem`, `ViewMarkItem`, `MarkActiveItem`)
 - `GetViewToFile` HTML export
@@ -281,14 +281,14 @@ Deferred items from PLAN-v0.2.0:
 - `MergeTemplate` commands
 - `GetPreference`, `GetCallerID`
 
-### 6.4  Bulk operations
+### 6.4  Bulk operations ✅
 - `session.upsert(category, pk_field, rows)` — add-or-update based on PK match
 - `session.copy_category(from_cat, to_cat, field_map)` — data migration helper
 - Parallel batch reads via thread pool (multiple cursors)
 
-### 6.5  Notifications / watch
+### 6.5  Notifications / watch ✅
 - Poll-based change detection: `session.watch("Hire", interval=5)` yields new/changed rows
-- Could use DDE `FireTrigger` integration for event-driven updates
+- Async generator: `async for event in db.watch("Hire"): ...`
 
 ---
 
@@ -301,7 +301,7 @@ Deferred items from PLAN-v0.2.0:
 | **0.3.0** | *CLI* | `click` + `rich` CLI with read/schema/count/info commands |
 | **0.3.1** | *Export* | CSV/JSON/Excel export, backup service |
 | **0.4.0** | *GUI* | NiceGUI desktop app — browse, search, export, view schema |
-| **0.5.0** | *Advanced* | MCP server, async wrapper, remaining DBAPI, bulk ops |
+| **0.5.0** | *Advanced* | Async wrapper, remaining DBAPI surface, MCP server, bulk ops, watch |
 
 ---
 

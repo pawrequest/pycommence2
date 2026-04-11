@@ -24,3 +24,17 @@ def session() -> CommenceSession:
     yield s
     s.close()
 
+
+@pytest.fixture
+async def async_session():
+    """An AsyncCommenceSession for async tests.
+
+    Uses function scope so each async test gets a fresh session.
+    Requires pytest-asyncio.
+    """
+    from pycommence import AsyncCommenceSession
+
+    async with AsyncCommenceSession() as db:
+        yield db
+
+

@@ -667,6 +667,138 @@ class CommenceSession:
             max_rows=max_rows, dry_run=dry_run,
         )
 
+    # -- BULK shortcuts -------------------------------------------------------
+    def upsert(
+        self,
+        category: str,
+        pk_field: str,
+        rows: list[dict[str, str]],
+    ) -> dict[str, int]:
+        """Add-or-update rows based on primary-key match.
+
+        For each row, looks up existing items by *pk_field*. If a match
+        is found the row is updated; otherwise a new row is added.
+
+        Args:
+            category: Target Commence category.
+            pk_field: Field name used as the primary key for matching.
+            rows: List of field-value dicts (must include *pk_field*).
+
+        Returns:
+            Summary dict with keys ``added``, ``updated``, ``unchanged``.
+
+        Example::
+
+            result = db.upsert("Contact", "Name", [
+                {"Name": "Alice", "Email": "alice@new.com"},
+                {"Name": "NewPerson", "Email": "new@example.com"},
+            ])
+        """
+        return self._writer.upsert_rows(
+            category, pk_field, rows, reader=self._reader,
+        )
+
+    def copy_category(
+        self,
+        from_category: str,
+        to_category: str,
+        field_map: dict[str, str] | None = None,
+        *,
+        max_rows: int = 50_000,
+    ) -> int:
+        """Copy rows from one category to another with optional field mapping.
+
+        Args:
+            from_category: Source category name.
+            to_category: Target category name.
+            field_map: Optional ``source_field → target_field`` mapping.
+            max_rows: Maximum rows to copy.
+
+        Returns:
+            The number of rows copied.
+
+        Example::
+
+            copied = db.copy_category(
+                "OldContacts", "Contact",
+                field_map={"FullName": "Name"},
+            )
+        """
+        from pycommence.services.migration import copy_category
+        return copy_category(
+            self._reader, self._writer,
+            from_category, to_category,
+            field_map=field_map,
+            max_rows=max_rows,
+        )
+
+    # -- WATCH shortcut ------------------------------------------------------
+    def watch(
+        self,
+        category: str,
+        *,
+        columns: list[str] | None = None,
+        filters: list[str] | None = None,
+        interval: float = 5.0,
+        max_rows: int = 500,
+    ):
+        """Blocking generator that yields events when rows change.
+
+        Polls *category* at *interval* seconds and diffs against the
+        previous snapshot.
+
+        Args:
+            category: Commence category name to watch.
+            columns: Specific field names. ``None`` → all fields.
+            filters: Optional DDE-style filter strings.
+            interval: Seconds between polls (default 5).
+            max_rows: Maximum rows to track.
+
+        Yields:
+            :class:`~pycommence.models.WatchEvent` instances.
+
+        Example::
+
+            for event in db.watch("Hire", interval=5):
+                print(event.event_type, event.row["Name"])
+        """
+        from pycommence.services.watch import PollWatcher
+        watcher = PollWatcher(
+            self._reader, category,
+            columns=columns, filters=filters,
+            interval=interval, max_rows=max_rows,
+        )
+        yield from watcher
+
+    # -- DDE convenience shortcuts -------------------------------------------
+    def mark_item(self, category: str, item_name: str) -> None:
+        """Mark (highlight) an item in a Commence view via DDE.
+
+        Args:
+            category: Commence category name.
+            item_name: Item name (primary key) to mark.
+
+        Example::
+
+            db.mark_item("Contact", "Jane Doe")
+        """
+        self._dde.view_mark_item(category, item_name)
+
+    def get_preference(self, pref_name: str) -> str:
+        """Return a Commence preference value via DDE.
+
+        Args:
+            pref_name: Preference key (e.g. ``"Me"``).
+
+        Returns:
+            The preference value as a string.
+
+        Example::
+
+            me = db.get_preference("Me")
+        """
+        return self._dde.get_preference(pref_name)
+
     # -- context manager -----------------------------------------------------
     def close(self) -> None:
         """Release the COM connection.

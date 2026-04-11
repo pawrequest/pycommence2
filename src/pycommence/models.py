@@ -277,6 +277,23 @@ def _coerce_value(raw: str, ft: "FieldType") -> Any:
 
 
 # ---------------------------------------------------------------------------
+# Watch event model
+# ---------------------------------------------------------------------------
+@dataclass(slots=True)
+class WatchEvent:
+    """An event emitted by the poll-based watcher when a row changes.
+
+    Attributes:
+        event_type: One of ``"added"``, ``"changed"``, or ``"removed"``.
+        row: The :class:`RowResult` associated with the event.
+            For ``"removed"`` events this is the last-seen snapshot.
+    """
+
+    event_type: str  # "added", "changed", "removed"
+    row: "RowResult" = field(default_factory=lambda: RowResult())
+
+
+# ---------------------------------------------------------------------------
 # Filter / Sort descriptors  (used by QueryBuilder)
 # ---------------------------------------------------------------------------
 class FilterType:

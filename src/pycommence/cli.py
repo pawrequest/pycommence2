@@ -491,6 +491,55 @@ def import_cmd(
 
 
 # ---------------------------------------------------------------------------
+# mcp
+# ---------------------------------------------------------------------------
+
+@cli.command()
+@click.option("--read-only", is_flag=True,
+              help="Disable write tools (add, edit, delete, connections).")
+@click.option("--transport", default="stdio",
+              type=click.Choice(["stdio", "sse"], case_sensitive=False),
+              show_default=True, help="MCP transport protocol.")
+@click.option("--port", default=8000, type=int, show_default=True,
+              help="Port for SSE transport.")
+def mcp(read_only: bool, transport: str, port: int) -> None:
+    """Start the MCP server for LLM agent access to Commence.
+
+    Exposes Commence database operations as MCP tools over stdio or SSE.
+
+    Requires the ``mcp`` extra::
+
+        pip install pycommence[mcp]
+
+    \b
+    Examples:
+        pycommence mcp
+        pycommence mcp --read-only
+        pycommence mcp --transport sse --port 9000
+    """
+    try:
+        from pycommence.mcp_server import _build_server, _check_mcp_installed
+    except ImportError:
+        raise click.ClickException(
+            "The MCP server requires the 'mcp' extra.  Install with:\n"
+            "  pip install pycommence[mcp]"
+        )
+
+    _check_mcp_installed()
+    server = _build_server(read_only=read_only)
+
+    console.print(
+        f"[bold green]▶[/bold green] Starting MCP server "
+        f"(transport={transport}, read_only={read_only})"
+    )
+
+    if transport == "stdio":
+        server.run(transport="stdio")
+    else:
+        server.run(transport="sse", port=port)
+
+
+# ---------------------------------------------------------------------------
 # gui
 # ---------------------------------------------------------------------------
 

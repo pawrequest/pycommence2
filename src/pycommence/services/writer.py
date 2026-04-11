@@ -237,3 +237,77 @@ class WriterService:
             rs.commit()
             return rs.row_count
 
+    # -- UPSERT --------------------------------------------------------------
+    def upsert_rows(
+        self,
+        category: str,
+        pk_field: str,
+        rows: list[dict[str, str]],
+        *,
+        reader: "ReaderService | None" = None,
+    ) -> dict[str, int]:
+        """Add-or-update rows based on primary-key match.
+
+        For each row in *rows*, looks up existing items by *pk_field*.
+        If a match is found the row is updated; otherwise a new row is added.
+
+        Args:
+            category: Target Commence category.
+            pk_field: Field name used as the primary key for matching.
+            rows: List of field-value dicts (must include *pk_field*).
+            reader: Optional ``ReaderService`` for lookups.  If ``None``,
+                one is created internally from ``self._db``.
+
+        Returns:
+            Summary dict with keys ``added``, ``updated``, ``unchanged``.
+
+        Example::
+
+            result = writer.upsert_rows("Contact", "Name", [
+                {"Name": "Alice", "Email": "alice@new.com"},
+                {"Name": "NewPerson", "Email": "new@example.com"},
+            ])
+            # {"added": 1, "updated": 1, "unchanged": 0}
+        """
+        if reader is None:
+            from pycommence.services.reader import ReaderService
+            reader = ReaderService(self._db)
+
+        added = 0
+        updated = 0
+        unchanged = 0
+
+        for row in rows:
+            pk_value = row.get(pk_field, "")
+            if not pk_value:
+                log.warning("Skipping row with empty pk_field %r", pk_field)
+                continue
+
+            # Look up existing row by PK filter
+            filter_clause = (
+                f'[ViewFilter(1, F, , "{pk_field}", "Equal To", "{pk_value}", False)]'
+            )
+            existing = reader.read_rows(
+                category,
+                columns=[pk_field],
+                filters=[filter_clause],
+                max_rows=1,
+                get_ids=True,
+            )
+
+            if existing:
+                # Update — check if there's actually something to change
+                row_id = existing[0].row_id
+                fields_to_update = {k: v for k, v in row.items() if k != pk_field}
+                if fields_to_update and row_id:
+                    self.edit_row_by_id(category, row_id, fields_to_update)
+                    updated += 1
+                else:
+                    unchanged += 1
+            else:
+                # Add
+                self.add_row(category, row)
+                added += 1
+
+        return {"added": added, "updated": updated, "unchanged": unchanged}
+

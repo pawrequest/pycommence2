@@ -28,8 +28,11 @@ pip install pycommence[gui]
 # Excel export support (openpyxl)
 pip install pycommence[export]
 
+# MCP server for LLM agent access
+pip install pycommence[mcp]
+
 # Install everything
-pip install pycommence[cli,gui,export]
+pip install pycommence[cli,gui,export,mcp]
 ```
 
 ## Prerequisites
@@ -111,6 +114,26 @@ with CommenceSession() as db:
         print(row["Name"])
 ```
 
+## Async Usage
+
+Use `AsyncCommenceSession` for async frameworks (FastAPI, NiceGUI, etc.):
+
+```python
+import asyncio
+from pycommence import AsyncCommenceSession
+
+async def main():
+    async with AsyncCommenceSession() as db:
+        name = await db.db_name()
+        print(f"Connected to: {name}")
+
+        rows = await db.read("Contact", columns=["Name", "Email"], max_rows=10)
+        for row in rows:
+            print(row["Name"], row["Email"])
+
+asyncio.run(main())
+```
+
 ## What's Next?
 
 - [Architecture](architecture.md) — understand the three-layer design
@@ -120,5 +143,7 @@ with CommenceSession() as db:
 - [Export & Import](export-import.md) — CSV, JSON, Excel export/import and backup
 - [CLI Reference](cli.md) — command-line tools
 - [GUI](gui.md) — NiceGUI desktop frontend
+- [Async Session](async.md) — use with asyncio / FastAPI
+- [MCP Server](mcp.md) — expose Commence to LLM agents
 - [API Reference](api/session.md) — full API docs
 

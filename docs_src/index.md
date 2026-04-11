@@ -16,6 +16,7 @@ A clean, modern Python library for **Commence database** CRUD operations and sch
 - **Export & Import** — CSV, JSON, and Excel export/import with backup support
 - **CLI** — `click` + `rich` command-line interface for read, schema, export, backup, import
 - **GUI** — NiceGUI desktop app for browsing, searching, exporting, and managing data
+- **Async support** — `AsyncCommenceSession` for use in `asyncio` frameworks (FastAPI, NiceGUI, etc.)
 
 ## Quick Example
 
@@ -53,5 +54,6 @@ with CommenceSession() as db:
 - [Architecture](architecture.md) — understand the layer design
 - [CLI Reference](cli.md) — command-line tools
 - [GUI](gui.md) — desktop frontend
+- [Async Session](async.md) — use with asyncio frameworks
 - [API Reference](api/session.md) — full API documentation
 

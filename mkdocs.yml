@@ -74,8 +74,11 @@ nav:
       - Export & Import: export-import.md
       - CLI Reference: cli.md
       - GUI: gui.md
+      - Async Session: async.md
+      - MCP Server: mcp.md
   - API Reference:
       - CommenceSession: api/session.md
+      - AsyncCommenceSession: api/async_session.md
       - QueryBuilder: api/query.md
       - Services:
           - SchemaService: api/schema.md
@@ -84,6 +87,8 @@ nav:
           - ExportService: api/export.md
           - BackupService: api/backup.md
           - ImportService: api/import.md
+      - MCP Server: api/mcp.md
+      - PollWatcher / WatchEvent: api/watch.md
       - Models: api/models.md
       - Exceptions: api/exceptions.md
   - FAQ / Troubleshooting: faq.md

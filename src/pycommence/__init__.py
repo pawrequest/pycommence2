@@ -23,7 +23,9 @@ from pycommence.models import (
     RelatedColumn,
     RowResult,
     SortSpec,
+    WatchEvent,
 )
+from pycommence.async_session import AsyncCommenceSession
 from pycommence.query import QueryBuilder
 from pycommence.services.backup import BackupService
 from pycommence.services.connections import ConnectionService
@@ -34,7 +36,8 @@ from pycommence.session import CommenceSession
 
 __all__ = [
     "__version__",
-    # Public entry point
+    # Public entry points
+    "AsyncCommenceSession",
     "CommenceSession",
     "QueryBuilder",
     # Services
@@ -53,6 +56,7 @@ __all__ = [
     "RelatedColumn",
     "RowResult",
     "SortSpec",
+    "WatchEvent",
     # Exceptions
     "CommenceError",
     "CommenceNotFoundError",
