@@ -2,7 +2,7 @@
 
 Manage Commence connections (relationships) between items via DDE.
 
-::: pycommence_vibes.services.connections.ConnectionService
+::: pycommence.services.connections.ConnectionService
     options:
       members:
         - assign

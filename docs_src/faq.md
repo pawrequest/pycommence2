@@ -76,11 +76,45 @@ They use different underlying APIs:
 - `session.add()` uses the **cursor/rowset API** — creates an AddRowSet, sets field values, commits. Returns the new row ID. Best for programmatic batch operations.
 - `dde.add_item()` uses the **DDE API** — sends an `[AddItem(...)]` command. Simpler but doesn't return a row ID. Best for one-off item creation by name.
 
-### Can I use pycommence-vibes with multiple databases?
+### Can I use pycommence with multiple databases?
 
 Each `CommenceSession` connects to whichever database Commence currently has open. To work with a different database, switch databases in Commence first, then create a new session.
 
-### Is pycommence-vibes thread-safe?
+### Is pycommence thread-safe?
 
 No. COM STA objects are single-threaded by design. Create one `CommenceSession` per thread if you need concurrent access.
+
+## CLI / GUI / Export
+
+### How do I install the CLI?
+
+The CLI is an optional extra:
+
+```bash
+pip install pycommence[cli]
+# or
+uv add pycommence[cli]
+```
+
+Then run `pycommence --help` to see available commands.
+
+### The GUI won't start / NiceGUI import error
+
+The GUI requires its own optional dependencies:
+
+```bash
+pip install pycommence[gui]
+```
+
+If you see `ImportError: No module named 'nicegui'`, you haven't installed the `gui` extra.
+
+### Excel export fails with "No module named 'openpyxl'"
+
+Excel export requires the `export` extra:
+
+```bash
+pip install pycommence[export]
+```
+
+CSV and JSON exports work without extra dependencies.
 

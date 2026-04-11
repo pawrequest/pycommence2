@@ -312,30 +312,217 @@ def count(category: str, filters: tuple[str, ...]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# export (stub for Phase 4)
+# export
 # ---------------------------------------------------------------------------
 
 @cli.command()
 @click.argument("category")
 @click.argument("outfile")
-def export(category: str, outfile: str) -> None:
-    """Export CATEGORY to a file. (Coming in v0.3.1)"""
-    raise click.ClickException(
-        "Export is not yet implemented.  Coming in v0.3.1.\n"
-        "Use 'pycommence read --format csv' and redirect to a file for now."
-    )
+@click.option("-c", "--columns", default=None,
+              help="Comma-separated column names to include.")
+@click.option("-f", "--filter", "filters", multiple=True,
+              help="Filter as 'FIELD:QUALIFIER:VALUE' (repeatable).")
+@click.option("-l", "--limit", default=50_000, show_default=True, type=int,
+              help="Maximum rows to export.")
+@click.option("--format", "fmt", default=None,
+              type=click.Choice(["csv", "json", "excel"], case_sensitive=False),
+              help="Output format (auto-detected from extension if omitted).")
+@click.option("--canonical/--no-canonical", default=True, show_default=True,
+              help="Use canonical (locale-independent) data formatting.")
+def export(
+    category: str,
+    outfile: str,
+    columns: str | None,
+    filters: tuple[str, ...],
+    limit: int,
+    fmt: str | None,
+    canonical: bool,
+) -> None:
+    """Export CATEGORY to OUTFILE (CSV, JSON, or Excel).
+
+    Format is auto-detected from the file extension (.csv, .json, .xlsx)
+    unless --format is specified.
+
+    \b
+    Examples:
+        pycommence export Contact contacts.csv
+        pycommence export Hire hires.json --limit 1000
+        pycommence export Account data.xlsx --columns "Name,Email,Phone"
+    """
+    session = _get_session()
+    try:
+        col_list = [c.strip() for c in columns.split(",")] if columns else None
+        filter_strs = None
+        if filters:
+            from pycommence.query import QueryBuilder
+            qb = session.query(category)
+            for raw_f in filters:
+                field, qual, value = _parse_filter(raw_f)
+                qb.where(field, qual, value)
+            filter_strs = qb._filters  # noqa: SLF001
+
+        count = session.export(
+            category, outfile,
+            format=fmt,
+            columns=col_list,
+            filters=filter_strs,
+            max_rows=limit,
+            canonical=canonical,
+        )
+        console.print(
+            f"[bold green]✓[/bold green] Exported [bold]{count:,}[/bold] rows "
+            f"from {category} → {outfile}"
+        )
+    finally:
+        session.close()
 
 
 # ---------------------------------------------------------------------------
-# gui (stub for Phase 5)
+# backup
 # ---------------------------------------------------------------------------
 
 @cli.command()
-def gui() -> None:
-    """Launch the NiceGUI frontend. (Coming in v0.4.0)"""
-    raise click.ClickException(
-        "GUI is not yet implemented.  Coming in v0.4.0.\n"
-        "Install the gui extra when available: pip install pycommence[gui]"
+@click.argument("output_dir")
+@click.option("-c", "--categories", default=None,
+              help="Comma-separated category names (default: all).")
+@click.option("-l", "--limit", default=50_000, show_default=True, type=int,
+              help="Maximum rows per category.")
+@click.option("--canonical/--no-canonical", default=True, show_default=True,
+              help="Use canonical data formatting.")
+def backup(
+    output_dir: str,
+    categories: str | None,
+    limit: int,
+    canonical: bool,
+) -> None:
+    """Backup categories to OUTPUT_DIR with schema metadata.
+
+    Creates a directory of JSON files (one per category) plus a
+    _schema.json sidecar with field and connection definitions.
+
+    \b
+    Examples:
+        pycommence backup ./my_backup
+        pycommence backup ./partial --categories "Contact,Hire"
+    """
+    session = _get_session()
+    try:
+        cat_list = (
+            [c.strip() for c in categories.split(",")]
+            if categories else None
+        )
+        stats = session.backup(
+            output_dir,
+            categories=cat_list,
+            max_rows_per_category=limit,
+            canonical=canonical,
+        )
+        console.print(
+            f"[bold green]✓[/bold green] Backup complete: "
+            f"[bold]{stats['categories_exported']}[/bold] categories, "
+            f"[bold]{stats['total_rows']:,}[/bold] rows → {output_dir}"
+        )
+    finally:
+        session.close()
+
+
+# ---------------------------------------------------------------------------
+# import (load)
+# ---------------------------------------------------------------------------
+
+@cli.command(name="import")
+@click.argument("category")
+@click.argument("infile")
+@click.option("--dry-run", is_flag=True,
+              help="Parse and validate without writing data.")
+@click.option("-l", "--limit", default=None, type=int,
+              help="Maximum rows to import.")
+def import_cmd(
+    category: str,
+    infile: str,
+    dry_run: bool,
+    limit: int | None,
+) -> None:
+    """Import rows from INFILE into CATEGORY.
+
+    Supports CSV (.csv) and JSON (.json) files.
+
+    \b
+    Examples:
+        pycommence import Contact contacts.csv
+        pycommence import Hire hires.json --dry-run
+        pycommence import Account data.csv --limit 100
+    """
+    from pathlib import Path
+    ext = Path(infile).suffix.lower()
+    session = _get_session()
+    try:
+        if ext == ".csv":
+            result = session.import_csv(
+                category, infile, max_rows=limit, dry_run=dry_run,
+            )
+        elif ext == ".json":
+            result = session.import_json(
+                category, infile, max_rows=limit, dry_run=dry_run,
+            )
+        else:
+            raise click.ClickException(
+                f"Unsupported import format: '{ext}'. Use .csv or .json."
+            )
+
+        if dry_run:
+            console.print(
+                f"[bold yellow]DRY RUN[/bold yellow]: parsed "
+                f"[bold]{result['rows_parsed']}[/bold] rows from {infile} "
+                f"(no data written)"
+            )
+        else:
+            console.print(
+                f"[bold green]✓[/bold green] Imported "
+                f"[bold]{result['rows_imported']}[/bold]/"
+                f"{result['rows_parsed']} rows into {category}"
+            )
+            errors = result.get("errors", [])
+            if errors:
+                for err in errors:  # type: ignore[union-attr]
+                    console.print(f"  [red]✗[/red] {err}")
+    finally:
+        session.close()
+
+
+# ---------------------------------------------------------------------------
+# gui
+# ---------------------------------------------------------------------------
+
+@cli.command()
+@click.option("--no-native", is_flag=True,
+              help="Run as a web app instead of a native window.")
+@click.option("--port", default=0, type=int,
+              help="Server port (0 = auto).")
+@click.option("--reload", is_flag=True,
+              help="Enable hot-reload (for development).")
+def gui(no_native: bool, port: int, reload: bool) -> None:
+    """Launch the NiceGUI desktop frontend.
+
+    Opens a native desktop window with a full GUI for browsing,
+    searching, exporting, and managing Commence data.
+
+    Requires the ``gui`` extra::
+
+        pip install pycommence[gui]
+    """
+    try:
+        from pycommence.gui import run as gui_run
+    except ImportError:
+        raise click.ClickException(
+            "The GUI requires the 'gui' extra.  Install with:\n"
+            "  pip install pycommence[gui]"
+        )
+
+    gui_run(
+        native=not no_native,
+        port=port,
+        reload=reload,
     )
 
 

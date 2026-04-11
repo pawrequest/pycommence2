@@ -1,4 +1,4 @@
-# pycommence-vibes
+# pycommence
 
 A clean, modern Python library for **Commence database** CRUD operations and schema introspection via COM automation.
 
@@ -13,6 +13,9 @@ A clean, modern Python library for **Commence database** CRUD operations and sch
 - **View cursors** — query against saved Commence views
 - **Related columns** — pull connected/indirect fields into query results
 - **Canonical mode** — locale-independent data format for dates, numbers, booleans
+- **Export & Import** — CSV, JSON, and Excel export/import with backup support
+- **CLI** — `click` + `rich` command-line interface for read, schema, export, backup, import
+- **GUI** — NiceGUI desktop app for browsing, searching, exporting, and managing data
 
 ## Quick Example
 
@@ -48,5 +51,7 @@ with CommenceSession() as db:
 
 - [Getting Started](getting-started.md) — install and run your first script
 - [Architecture](architecture.md) — understand the layer design
+- [CLI Reference](cli.md) — command-line tools
+- [GUI](gui.md) — desktop frontend
 - [API Reference](api/session.md) — full API documentation
 

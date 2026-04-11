@@ -1,6 +1,6 @@
 # Query & Filtering
 
-pycommence-vibes provides two ways to read data: the `session.read()` shortcut and the fluent `QueryBuilder`.
+pycommence provides two ways to read data: the `session.read()` shortcut and the fluent `QueryBuilder`.
 
 ## Simple Reads
 

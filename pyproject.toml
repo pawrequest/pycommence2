@@ -1,6 +1,6 @@
 [project]
 name = "pycommence"
-version = "0.3.0"
+version = "0.4.0"
 description = "Clean Python library for Commence database CRUD & schema introspection via COM automation."
 readme = "README.md"
 license = "MIT"
@@ -14,19 +14,20 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/pawrequest/pycommence-vibes"
-Documentation = "https://pawrequest.github.io/pycommence-vibes/"
-Repository = "https://github.com/pawrequest/pycommence-vibes"
-Changelog = "https://github.com/pawrequest/pycommence-vibes/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/pawrequest/pycommence"
+Documentation = "https://pawrequest.github.io/pycommence/"
+Repository = "https://github.com/pawrequest/pycommence"
+Changelog = "https://github.com/pawrequest/pycommence/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 cli = ["click>=8.0", "rich>=13.0"]
-gui = ["nicegui>=2.0"]
-dev = ["pytest>=8.0", "ruff>=0.4"]
+export = ["openpyxl>=3.1"]
+gui = ["nicegui>=2.0", "pywebview>=5.0"]
+dev = ["pytest>=8.0", "pytest-asyncio>=1.0", "ruff>=0.4"]
 docs = ["mkdocs-material>=9.0", "mkdocstrings[python]>=0.25"]
 
 [project.scripts]
-pycommence = "pycommence_vibes.cli:cli"
+pycommence = "pycommence.cli:cli"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

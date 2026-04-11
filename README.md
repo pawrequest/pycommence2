@@ -1,4 +1,4 @@
-# pycommence-vibes
+# pycommence
 
 A clean, modern Python library for **Commence database** CRUD operations and schema introspection via COM automation.
 
@@ -208,7 +208,7 @@ uv add pycommence
 
 ## Documentation
 
-Full docs are available at the [MkDocs site](https://pawrequest.github.io/pycommence-vibes/). Build locally:
+Full docs are available at the [MkDocs site](https://pawrequest.github.io/pycommence/). Build locally:
 
 ```bash
 uv pip install -e ".[docs]"
@@ -217,12 +217,12 @@ mkdocs serve
 
 ## Roadmap
 
-See [ROADMAP.md](ROADMAP.md) for the full plan.  In priority order:
+See [ROADMAP.md](ROADMAP.md) for the full plan.
 
-1. **Documentation** (v0.2.1) — MkDocs site, CHANGELOG, expanded docstrings
-2. **Packaging & Polish** (v0.2.2) — `py.typed`, schema caching, `RowResult` improvements
-3. **CLI** (v0.3.0) — `click` + `rich` CLI for read/schema/export
-4. **Export / Import** (v0.3.1) — CSV, JSON, Excel export + backup service
-5. **NiceGUI Frontend** (v0.4.0) — Desktop app for browsing, searching, exporting
+1. ~~**Documentation** (v0.2.1) — MkDocs site, CHANGELOG, expanded docstrings~~ ✅
+2. ~~**Packaging & Polish** (v0.2.2) — `py.typed`, schema caching, `RowResult` improvements~~ ✅
+3. ~~**CLI** (v0.3.0) — `click` + `rich` CLI for read/schema/export~~ ✅
+4. ~~**Export / Import** (v0.3.1) — CSV, JSON, Excel export + backup service~~ ✅
+5. ~~**NiceGUI Frontend** (v0.4.0) — Desktop app for browsing, searching, exporting~~ ✅
 6. **Advanced** (v0.5.0) — MCP server, async wrapper, remaining DBAPI surface
 

@@ -2,7 +2,7 @@
 
 Direct DDE Execute/Request commands for operations not covered by the cursor API.
 
-::: pycommence_vibes.services.dde.DdeService
+::: pycommence.services.dde.DdeService
     options:
       members:
         - add_item

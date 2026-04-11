@@ -1,10 +1,10 @@
 # Models
 
-Pure Python dataclasses used throughout pycommence-vibes. No COM references.
+Pure Python dataclasses used throughout pycommence. No COM references.
 
 ## Field Types
 
-::: pycommence_vibes.models.FieldType
+::: pycommence.models.FieldType
     options:
       members:
         - TEXT
@@ -26,15 +26,15 @@ Pure Python dataclasses used throughout pycommence-vibes. No COM references.
 
 ## Schema Models
 
-::: pycommence_vibes.models.FieldInfo
+::: pycommence.models.FieldInfo
 
-::: pycommence_vibes.models.ConnectionInfo
+::: pycommence.models.ConnectionInfo
 
-::: pycommence_vibes.models.CategoryInfo
+::: pycommence.models.CategoryInfo
 
 ## Row / Result Models
 
-::: pycommence_vibes.models.RowResult
+::: pycommence.models.RowResult
     options:
       members:
         - columns
@@ -44,11 +44,10 @@ Pure Python dataclasses used throughout pycommence-vibes. No COM references.
 
 ## Filter / Sort Descriptors
 
-::: pycommence_vibes.models.FilterType
+::: pycommence.models.FilterType
 
-::: pycommence_vibes.models.FilterClause
+::: pycommence.models.FilterClause
 
-::: pycommence_vibes.models.SortSpec
+::: pycommence.models.SortSpec
 
-::: pycommence_vibes.models.RelatedColumn
-
+::: pycommence.models.RelatedColumn

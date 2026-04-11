@@ -2,7 +2,7 @@
 
 Fluent, chainable query builder for constructing Commence queries.
 
-::: pycommence_vibes.query.QueryBuilder
+::: pycommence.query.QueryBuilder
     options:
       members:
         - __init__

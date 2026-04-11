@@ -2,7 +2,7 @@
 
 Read-only schema introspection powered by DDE conversations.
 
-::: pycommence_vibes.services.schema.SchemaService
+::: pycommence.services.schema.SchemaService
     options:
       members:
         - list_categories

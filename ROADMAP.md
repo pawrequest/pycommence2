@@ -1,4 +1,4 @@
-# pycommence-vibes — Development Roadmap
+# pycommence — Development Roadmap
 
 > Post-v0.2.0 plan.  Everything in [PLAN-v0.2.0.md](PLAN-v0.2.0.md) is shipped.
 
@@ -58,7 +58,7 @@ Add sections for: view cursors (`query_view`), related columns, canonical mode, 
 
 ### 2.1  Publishing readiness ✅
 - `LICENSE` file (MIT)
-- `py.typed` marker in `src/pycommence_vibes/` (PEP 561)
+- `py.typed` marker in `src/pycommence/` (PEP 561)
 - `__version__` via `importlib.metadata` in `__init__.py`
 - `[project.urls]` in `pyproject.toml` (Homepage, Docs, Repository)
 
@@ -70,7 +70,7 @@ cause silent data corruption.  We need a **layered invalidation strategy**.
 
 #### Storage
 
-New module: `src/pycommence_vibes/cache.py`
+New module: `src/pycommence/cache.py`
 
 ```python
 from platformdirs import user_cache_dir
@@ -199,10 +199,10 @@ cli = ["click>=8.0", "rich>=13.0"]
 
 ---
 
-## Phase 4 — Export & Import  `v0.3.1`
+## Phase 4 — Export & Import  `v0.3.1` ✅
 
-### 4.1  `ExportService`
-New `src/pycommence_vibes/services/export.py`:
+### 4.1  `ExportService` ✅
+New `src/pycommence/services/export.py`:
 
 ```python
 class ExportService:
@@ -216,7 +216,7 @@ Wire into session:
 session.export("Hire", "hires.csv", format="csv", max_rows=5000)
 ```
 
-### 4.2  `BackupService`
+### 4.2  `BackupService` ✅
 Export all categories (or selected) to a directory of JSON files with schema metadata sidecar:
 ```
 backup/
@@ -226,20 +226,20 @@ backup/
   ...
 ```
 
-### 4.3  Import (stretch)
+### 4.3  Import ✅
 `from_csv()` / `from_json()` that map rows back to `session.add_many()`.
 
 ---
 
-## Phase 5 — NiceGUI Frontend  `v0.4.0`
+## Phase 5 — NiceGUI Frontend  `v0.4.0` ✅
 
-### 5.1  Architecture
-- New package: `src/pycommence_vibes/gui/`
-- Uses `CommenceSession` directly — no separate backend
+### 5.1  Architecture ✅
+- New package: `src/pycommence/gui/`
+- Uses `CommenceSession` directly — via dedicated COM worker thread
 - Runs via `ui.run(native=True)` for desktop-app feel
 - Launched by `pycommence gui` CLI command
 
-### 5.2  Pages
+### 5.2  Pages ✅
 
 | Page | Features |
 |------|----------|
@@ -250,7 +250,7 @@ backup/
 | **Export Dialog** | Pick category, columns, filters → export to CSV/JSON/Excel |
 | **DDE Console** | Raw DDE request/execute with response display (power-user tool) |
 
-### 5.3  Design principles
+### 5.3  Design principles ✅
 - **Read-only by default.**  Edit/delete require explicit unlock toggle to prevent accidental data loss.
 - **Server-side pagination.**  Never load 13k rows into the browser.  Delegate to `ReaderService` batching.
 - **Responsive tables.**  Use `ui.table` with virtual scroll, not `ui.aggrid` (simpler, fewer deps).
@@ -261,7 +261,7 @@ backup/
 ## Phase 6 — Advanced Features  `v0.5.0+`
 
 ### 6.1  MCP server
-Expose `read`, `query`, `schema`, `add`, `edit`, `delete`, `connections` as MCP tools, allowing LLM agents to interact with Commence databases.  New module `src/pycommence_vibes/mcp_server.py`.  (There's already an external MCP server — this would be built-in.)
+Expose `read`, `query`, `schema`, `add`, `edit`, `delete`, `connections` as MCP tools, allowing LLM agents to interact with Commence databases.  New module `src/pycommence/mcp_server.py`.  (There's already an external MCP server — this would be built-in.)
 
 ### 6.2  Async wrapper
 COM is STA-bound.  Create `AsyncCommenceSession` that dispatches all calls to a dedicated thread via `asyncio.to_thread()`:

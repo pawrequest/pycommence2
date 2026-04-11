@@ -1,7 +1,7 @@
 site_name: pycommence
 site_description: Clean Python library for Commence database CRUD & schema introspection via COM automation.
-site_url: https://pawrequest.github.io/pycommence-vibes/
-repo_url: https://github.com/pawrequest/pycommence-vibes
+site_url: https://pawrequest.github.io/pycommence/
+repo_url: https://github.com/pawrequest/pycommence
 repo_name: pawrequest/pycommence
 docs_dir: docs_src
 
@@ -71,6 +71,9 @@ nav:
       - Connections: connections.md
       - DDE Operations: dde.md
       - Canonical Mode: canonical.md
+      - Export & Import: export-import.md
+      - CLI Reference: cli.md
+      - GUI: gui.md
   - API Reference:
       - CommenceSession: api/session.md
       - QueryBuilder: api/query.md
@@ -78,6 +81,9 @@ nav:
           - SchemaService: api/schema.md
           - ConnectionService: api/connections.md
           - DdeService: api/dde.md
+          - ExportService: api/export.md
+          - BackupService: api/backup.md
+          - ImportService: api/import.md
       - Models: api/models.md
       - Exceptions: api/exceptions.md
   - FAQ / Troubleshooting: faq.md

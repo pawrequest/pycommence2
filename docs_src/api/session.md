@@ -1,8 +1,8 @@
 # CommenceSession
 
-The single public entry point for pycommence-vibes.
+The single public entry point for pycommence.
 
-::: pycommence_vibes.session.CommenceSession
+::: pycommence.session.CommenceSession
     options:
       members:
         - __init__

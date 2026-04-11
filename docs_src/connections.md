@@ -115,7 +115,7 @@ with CommenceSession() as db:
 ## How Connections Work in Commence
 
 !!! note "DDE Only"
-    Connections cannot be created or deleted through the cursor/rowset API — they **must** use DDE Execute commands. pycommence-vibes handles this automatically via the `ConnectionService`.
+    Connections cannot be created or deleted through the cursor/rowset API — they **must** use DDE Execute commands. pycommence handles this automatically via the `ConnectionService`.
 
 - Connections are defined at the category level by a Commence administrator
 - Each connection has a **name**, a **from-category**, and a **to-category**

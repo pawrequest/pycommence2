@@ -1,6 +1,6 @@
 # Architecture
 
-pycommence-vibes is organised into three layers. Each layer has a clear responsibility and only talks to the layer below it.
+pycommence is organised into three layers. Each layer has a clear responsibility and only talks to the layer below it.
 
 ## Layer Diagram
 
@@ -53,6 +53,9 @@ Service classes that compose COM wrapper calls into useful operations:
 | `WriterService` | Add, edit, delete rows via cursor + Add/Edit/DeleteRowSet |
 | `ConnectionService` | Assign/unassign connections via DDE Execute |
 | `DdeService` | Remaining DDE commands: item CRUD, UI, triggers |
+| `ExportService` | Export rows to CSV, JSON, or Excel files |
+| `ImportService` | Import rows from CSV or JSON files |
+| `BackupService` | Full-database snapshot to a directory of JSON files |
 
 ### 3. `session.py` — Public API
 
@@ -77,7 +80,7 @@ Commence exposes two APIs:
 - **Cursor / RowSet API** — for batch reads and writes. Efficient for bulk operations.
 - **DDE Conversation API** — for schema introspection, single-item CRUD, connections, UI commands, and triggers.
 
-Some operations are only available via DDE (connections, triggers, `ShowItem`). Some are only efficient via cursors (reading 10,000 rows). pycommence-vibes uses both, choosing the right one for each operation.
+Some operations are only available via DDE (connections, triggers, `ShowItem`). Some are only efficient via cursors (reading 10,000 rows). pycommence uses both, choosing the right one for each operation.
 
 ### Why services instead of putting everything in the session?
 

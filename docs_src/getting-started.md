@@ -14,6 +14,24 @@ Or with pip:
 pip install pycommence
 ```
 
+### Optional Extras
+
+pycommence has optional dependency groups for additional features:
+
+```bash
+# Command-line interface (click + rich)
+pip install pycommence[cli]
+
+# NiceGUI desktop frontend
+pip install pycommence[gui]
+
+# Excel export support (openpyxl)
+pip install pycommence[export]
+
+# Install everything
+pip install pycommence[cli,gui,export]
+```
+
 ## Prerequisites
 
 1. **Windows** — Commence uses COM automation, which is Windows-only.
@@ -99,5 +117,8 @@ with CommenceSession() as db:
 - [Query & Filtering](querying.md) — deep dive into filters, sorts, and the query builder
 - [Connections](connections.md) — manage item relationships
 - [DDE Operations](dde.md) — direct DDE commands for UI control and more
+- [Export & Import](export-import.md) — CSV, JSON, Excel export/import and backup
+- [CLI Reference](cli.md) — command-line tools
+- [GUI](gui.md) — NiceGUI desktop frontend
 - [API Reference](api/session.md) — full API docs
 

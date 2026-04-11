@@ -1,4 +1,4 @@
-# pycommence-vibes v0.2.0 — Release Plan
+# pycommence v0.2.0 — Release Plan
 
 > Fix all identified flaws, expose missing Commence DBAPI/DDE surface area, and harden the library.
 >
@@ -11,7 +11,7 @@
 *No new files. Pure fixes to existing code. Zero risk of breaking existing callers.*
 
 ### 1.1 Fix `QueryBuilder.count()` to respect filters
-**File:** `src/pycommence_vibes/query.py`, `src/pycommence_vibes/services/reader.py`
+**File:** `src/pycommence/query.py`, `src/pycommence/services/reader.py`
 
 `count()` currently calls `self._reader.count(self._category)` which opens a bare cursor — **ignoring all accumulated filters and logic**. 
 
@@ -20,21 +20,21 @@
 - Update `QueryBuilder.count()` to pass `self._filters` and `self._logic`.
 
 ### 1.2 Forward `logic` param in `session.read()`
-**File:** `src/pycommence_vibes/session.py`
+**File:** `src/pycommence/session.py`
 
 `CommenceSession.read()` accepts `filters` and `sort` but does **not** accept or forward a `logic` parameter, even though `ReaderService.read_rows()` supports it.
 
 **Fix:** Add `logic: str | None = None` parameter and pass it through.
 
 ### 1.3 Guard `close()` against double-close
-**File:** `src/pycommence_vibes/_com/connection.py`
+**File:** `src/pycommence/_com/connection.py`
 
 Calling `close()` twice crashes (`AttributeError` + COM `CoUninitialize` imbalance).
 
 **Fix:** Add `self._closed = False` flag; make `close()` no-op when already closed.
 
 ### 1.4 Wrap `CommitGetCursor` in `RowsetWrapper`
-**Files:** `src/pycommence_vibes/_com/rowset.py`, `src/pycommence_vibes/services/writer.py`
+**Files:** `src/pycommence/_com/rowset.py`, `src/pycommence/services/writer.py`
 
 `WriterService.add_row()` calls `rs.raw.CommitGetCursor(0)` directly, bypassing the wrapper.
 
@@ -43,14 +43,14 @@ Calling `close()` twice crashes (`AttributeError` + COM `CoUninitialize` imbalan
 - Update `WriterService.add_row()` to use the wrapper method.
 
 ### 1.5 Clean up dead code in models
-**File:** `src/pycommence_vibes/models.py`
+**File:** `src/pycommence/models.py`
 
 `FilterClause.to_filter_string()` and `SortSpec.to_sort_string()` are never called by anything.
 
 **Fix:** Remove the `to_filter_string()` and `to_sort_string()` methods. Keep the dataclasses themselves as they're valid descriptors/documentation. Alternatively, wire `QueryBuilder` to use them — but inline string building is simpler and the models add an unnecessary indirection layer.
 
 ### 1.6 Fix `set_columns_all()` misleading no-op
-**File:** `src/pycommence_vibes/_com/cursor.py`, `src/pycommence_vibes/services/writer.py`
+**File:** `src/pycommence/_com/cursor.py`, `src/pycommence/services/writer.py`
 
 `set_columns_all()` is documented as setting all columns but is actually a no-op. Works by accident for `CMC_CURSOR_CATEGORY` (which defaults to all fields).
 
@@ -65,7 +65,7 @@ Calling `close()` twice crashes (`AttributeError` + COM `CoUninitialize` imbalan
 *Complete the low-level wrapper coverage. Every documented DBAPI method gets a Python wrapper.*
 
 ### 2.1 Add view-linking cursor methods
-**File:** `src/pycommence_vibes/_com/cursor.py`
+**File:** `src/pycommence/_com/cursor.py`
 
 Add three methods matching the DBAPI docs:
 
@@ -82,7 +82,7 @@ def set_active_date_range(self, start_date: str, end_date: str) -> None:
 ```
 
 ### 2.2 Add `SeekRowApprox`
-**File:** `src/pycommence_vibes/_com/cursor.py`
+**File:** `src/pycommence/_com/cursor.py`
 
 ```python
 def seek_row_approx(self, numerator: int, denominator: int) -> int:
@@ -90,7 +90,7 @@ def seek_row_approx(self, numerator: int, denominator: int) -> int:
 ```
 
 ### 2.3 Add `GetFieldToFile`
-**File:** `src/pycommence_vibes/_com/rowset.py`
+**File:** `src/pycommence/_com/rowset.py`
 
 ```python
 def get_field_to_file(self, row: int, col: int, filename: str, canonical: bool = False) -> int:
@@ -154,7 +154,7 @@ When `related_columns` are specified, after setting regular columns, call `cur.s
 *The biggest functional gap: Commence connections (relationships) and DDE execute operations.*
 
 ### 4.1 Create `ConnectionService`
-**New file:** `src/pycommence_vibes/services/connections.py`
+**New file:** `src/pycommence/services/connections.py`
 
 Uses `ConversationWrapper.execute()` with DDE commands:
 
@@ -177,7 +177,7 @@ class ConnectionService:
 ```
 
 ### 4.2 Create `DdeService` for remaining Execute commands
-**New file:** `src/pycommence_vibes/services/dde.py`
+**New file:** `src/pycommence/services/dde.py`
 
 Wraps the most useful DDE Execute and Request commands not covered by the cursor/rowset API:
 
@@ -208,7 +208,7 @@ class DdeService:
 ```
 
 ### 4.3 Wire into `CommenceSession`
-**File:** `src/pycommence_vibes/session.py`
+**File:** `src/pycommence/session.py`
 
 ```python
 @property
@@ -227,7 +227,7 @@ def unassign_connection(self, from_cat, from_item, conn_name, to_cat, to_item) -
 ## Phase 5 — Robustness, DX & Polish
 
 ### 5.1 Fix fragile `GetCategoryDefinition` parsing
-**File:** `src/pycommence_vibes/services/schema.py`
+**File:** `src/pycommence/services/schema.py`
 
 Replace the `zfill(10)` + negative-index approach with explicit positional parsing. The documented format is `000000{S}{M}{D}{C}` (10 chars). Parse the last 4 characters by name:
 
@@ -238,7 +238,7 @@ s, m, d, c = flag_str[-4], flag_str[-3], flag_str[-2], flag_str[-1]
 Handle the edge case where `{C}` may be separated by `\n` from `{D}` (strip whitespace from the flags string before parsing). Wrap in try/except → `SchemaError`.
 
 ### 5.2 COM retry decorator
-**New file:** `src/pycommence_vibes/_com/retry.py`
+**New file:** `src/pycommence/_com/retry.py`
 
 ```python
 import functools, time, pywintypes
@@ -266,7 +266,7 @@ Apply to:
 - `CommenceDB.__init__()` (the Dispatch call)
 
 ### 5.3 Thread-safety documentation and guard
-**File:** `src/pycommence_vibes/_com/connection.py`
+**File:** `src/pycommence/_com/connection.py`
 
 Add module-level docstring warning about COM STA threading. Add optional `_check_thread()` helper that logs a warning if COM objects are accessed from a non-main thread:
 
@@ -343,20 +343,20 @@ Phase 5 is **polish** that should come last.
 
 | File | Action | Phase |
 |---|---|---|
-| `src/pycommence_vibes/query.py` | Modify | 1, 2, 3 |
-| `src/pycommence_vibes/session.py` | Modify | 1, 2, 3, 4 |
-| `src/pycommence_vibes/services/reader.py` | Modify | 1, 2, 3 |
-| `src/pycommence_vibes/_com/connection.py` | Modify | 1, 5 |
-| `src/pycommence_vibes/_com/rowset.py` | Modify | 1, 2 |
-| `src/pycommence_vibes/_com/cursor.py` | Modify | 1, 2 |
-| `src/pycommence_vibes/models.py` | Modify | 1, 3 |
-| `src/pycommence_vibes/services/writer.py` | Modify | 1 |
-| `src/pycommence_vibes/services/schema.py` | Modify | 5 |
-| `src/pycommence_vibes/__init__.py` | Modify | 5 |
+| `src/pycommence/query.py` | Modify | 1, 2, 3 |
+| `src/pycommence/session.py` | Modify | 1, 2, 3, 4 |
+| `src/pycommence/services/reader.py` | Modify | 1, 2, 3 |
+| `src/pycommence/_com/connection.py` | Modify | 1, 5 |
+| `src/pycommence/_com/rowset.py` | Modify | 1, 2 |
+| `src/pycommence/_com/cursor.py` | Modify | 1, 2 |
+| `src/pycommence/models.py` | Modify | 1, 3 |
+| `src/pycommence/services/writer.py` | Modify | 1 |
+| `src/pycommence/services/schema.py` | Modify | 5 |
+| `src/pycommence/__init__.py` | Modify | 5 |
 | `pyproject.toml` | Modify | 5 |
-| `src/pycommence_vibes/services/connections.py` | **Create** | 4 |
-| `src/pycommence_vibes/services/dde.py` | **Create** | 4 |
-| `src/pycommence_vibes/_com/retry.py` | **Create** | 5 |
+| `src/pycommence/services/connections.py` | **Create** | 4 |
+| `src/pycommence/services/dde.py` | **Create** | 4 |
+| `src/pycommence/_com/retry.py` | **Create** | 5 |
 | `tests/test_connections.py` | **Create** | 5 |
 | `tests/test_dde.py` | **Create** | 5 |
 | `tests/test_view_cursor.py` | **Create** | 5 |

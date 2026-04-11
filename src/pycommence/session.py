@@ -35,12 +35,17 @@ from __future__ import annotations
 
 import logging
 
+from pathlib import Path
+
 from pycommence._com.connection import CommenceDB
 from pycommence._com.constants import CMC_CURSOR_VIEW
 from pycommence.models import RowResult
 from pycommence.query import QueryBuilder
+from pycommence.services.backup import BackupService
 from pycommence.services.connections import ConnectionService
 from pycommence.services.dde import DdeService
+from pycommence.services.export import ExportService, detect_format
+from pycommence.services.import_svc import ImportService
 from pycommence.services.reader import ReaderService
 from pycommence.services.schema import SchemaService
 from pycommence.services.writer import WriterService
@@ -74,6 +79,9 @@ class CommenceSession:
         self._writer = WriterService(self._db)
         self._connections = ConnectionService(self._db)
         self._dde = DdeService(self._db)
+        self._export = ExportService()
+        self._backup = BackupService(self)
+        self._import = ImportService(self)
 
     # -- DB metadata ---------------------------------------------------------
     @property
@@ -138,6 +146,46 @@ class CommenceSession:
             email = db.dde.get_field("Contact", "Jane Doe", "Email")
         """
         return self._dde
+
+    @property
+    def export_service(self) -> ExportService:
+        """Access the export service for writing data to files.
+
+        Returns:
+            The ``ExportService`` instance for this session.
+
+        Example::
+
+            rows = db.read("Contact", max_rows=1000)
+            db.export_service.to_csv(rows, "contacts.csv")
+        """
+        return self._export
+
+    @property
+    def backup_service(self) -> BackupService:
+        """Access the backup service for full-database snapshots.
+
+        Returns:
+            The ``BackupService`` instance for this session.
+
+        Example::
+
+            stats = db.backup_service.backup("./backup")
+        """
+        return self._backup
+
+    @property
+    def import_service(self) -> ImportService:
+        """Access the import service for loading data from files.
+
+        Returns:
+            The ``ImportService`` instance for this session.
+
+        Example::
+
+            result = db.import_service.from_csv("Contact", "contacts.csv")
+        """
+        return self._import
 
     # -- connection shortcuts ------------------------------------------------
     def assign_connection(
@@ -464,6 +512,159 @@ class CommenceSession:
         """
         return self._writer.delete_rows(
             category, filters=filters, logic=logic, max_rows=max_rows,
+        )
+
+    # -- EXPORT shortcuts ----------------------------------------------------
+    def export(
+        self,
+        category: str,
+        path: str | Path,
+        *,
+        format: str | None = None,
+        columns: list[str] | None = None,
+        filters: list[str] | None = None,
+        logic: str | None = None,
+        max_rows: int = 50_000,
+        canonical: bool = True,
+    ) -> int:
+        """Export a category to a file (CSV, JSON, or Excel).
+
+        Reads rows from *category* and writes them to *path*.  The format
+        is auto-detected from the file extension unless *format* is given.
+
+        Args:
+            category: Commence category name.
+            path: Output file path (e.g. ``"contacts.csv"``).
+            format: Override format — ``"csv"``, ``"json"``, or ``"excel"``.
+                Auto-detected from extension if ``None``.
+            columns: Specific field names. ``None`` → all fields.
+            filters: Optional DDE-style filter strings.
+            logic: Filter logic string.
+            max_rows: Maximum rows to export.
+            canonical: If ``True``, use locale-independent formatting.
+
+        Returns:
+            The number of rows exported.
+
+        Example::
+
+            db.export("Hire", "hires.csv", max_rows=5000)
+            db.export("Contact", "out.json", columns=["Name", "Email"])
+            db.export("Account", "data.xlsx", format="excel")
+        """
+        fmt = format or detect_format(path)
+        rows = self.read(
+            category,
+            columns=columns,
+            filters=filters,
+            logic=logic,
+            max_rows=max_rows,
+            canonical=canonical,
+        )
+        if fmt == "csv":
+            return self._export.to_csv(rows, path, columns=columns)
+        elif fmt == "json":
+            return self._export.to_json(rows, path, columns=columns)
+        elif fmt == "excel":
+            return self._export.to_excel(rows, path, columns=columns)
+        else:
+            raise ValueError(f"Unknown export format: {fmt!r}")
+
+    def backup(
+        self,
+        output_dir: str | Path,
+        *,
+        categories: list[str] | None = None,
+        max_rows_per_category: int = 50_000,
+        canonical: bool = True,
+    ) -> dict[str, object]:
+        """Export categories to a backup directory with schema sidecar.
+
+        Creates a directory of JSON files (one per category) plus a
+        ``_schema.json`` sidecar with field/connection definitions.
+
+        Args:
+            output_dir: Target directory path.
+            categories: Category names to export. ``None`` → all.
+            max_rows_per_category: Row limit per category.
+            canonical: If ``True``, use locale-independent formatting.
+
+        Returns:
+            A summary dict with ``categories_exported``, ``total_rows``,
+            ``files``, ``timestamp``, etc.
+
+        Example::
+
+            stats = db.backup("./backup_2026-04-11")
+            stats = db.backup("./partial", categories=["Contact", "Hire"])
+        """
+        return self._backup.backup(
+            output_dir,
+            categories=categories,
+            max_rows_per_category=max_rows_per_category,
+            canonical=canonical,
+        )
+
+    def import_csv(
+        self,
+        category: str,
+        path: str | Path,
+        *,
+        field_map: dict[str, str] | None = None,
+        max_rows: int | None = None,
+        dry_run: bool = False,
+    ) -> dict[str, object]:
+        """Import rows from a CSV file into a category.
+
+        Args:
+            category: Target Commence category.
+            path: Path to the CSV file.
+            field_map: Optional ``csv_column → commence_field`` mapping.
+            max_rows: Maximum rows to import.
+            dry_run: Parse and validate without writing.
+
+        Returns:
+            Summary dict with ``rows_parsed``, ``rows_imported``,
+            ``errors``, ``dry_run``.
+
+        Example::
+
+            result = db.import_csv("Contact", "contacts.csv")
+        """
+        return self._import.from_csv(
+            category, path, field_map=field_map,
+            max_rows=max_rows, dry_run=dry_run,
+        )
+
+    def import_json(
+        self,
+        category: str,
+        path: str | Path,
+        *,
+        field_map: dict[str, str] | None = None,
+        max_rows: int | None = None,
+        dry_run: bool = False,
+    ) -> dict[str, object]:
+        """Import rows from a JSON file into a category.
+
+        Args:
+            category: Target Commence category.
+            path: Path to the JSON file (array of objects).
+            field_map: Optional ``json_key → commence_field`` mapping.
+            max_rows: Maximum rows to import.
+            dry_run: Parse and validate without writing.
+
+        Returns:
+            Summary dict with ``rows_parsed``, ``rows_imported``,
+            ``errors``, ``dry_run``.
+
+        Example::
+
+            result = db.import_json("Contact", "contacts.json")
+        """
+        return self._import.from_json(
+            category, path, field_map=field_map,
+            max_rows=max_rows, dry_run=dry_run,
         )
 
     # -- context manager -----------------------------------------------------

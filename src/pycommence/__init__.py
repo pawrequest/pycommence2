@@ -25,8 +25,11 @@ from pycommence.models import (
     SortSpec,
 )
 from pycommence.query import QueryBuilder
+from pycommence.services.backup import BackupService
 from pycommence.services.connections import ConnectionService
 from pycommence.services.dde import DdeService
+from pycommence.services.export import ExportService
+from pycommence.services.import_svc import ImportService
 from pycommence.session import CommenceSession
 
 __all__ = [
@@ -35,8 +38,11 @@ __all__ = [
     "CommenceSession",
     "QueryBuilder",
     # Services
+    "BackupService",
     "ConnectionService",
     "DdeService",
+    "ExportService",
+    "ImportService",
     # Models
     "CategoryInfo",
     "ConnectionInfo",
