@@ -32,7 +32,7 @@ class BackupService:
             print(f"Backed up {stats['categories_exported']} categories")
     """
 
-    def __init__(self, session: "CommenceSession") -> None:
+    def __init__(self, session: 'CommenceSession') -> None:
         self._session = session
 
     def backup(
@@ -77,14 +77,14 @@ class BackupService:
         total_rows = 0
         files: list[str] = []
         schema_data: dict[str, object] = {
-            "db_name": session.db_name,
-            "db_path": session.db_path,
-            "timestamp": timestamp,
-            "categories": {},
+            'db_name': session.db_name,
+            'db_path': session.db_path,
+            'timestamp': timestamp,
+            'categories': {},
         }
 
         for cat_name in all_cats:
-            log.info("Backing up category: %s", cat_name)
+            log.info('Backing up category: %s', cat_name)
             try:
                 rows = session.read(
                     cat_name,
@@ -96,65 +96,64 @@ class BackupService:
                 continue
 
             # Write data file
-            data_file = output_dir / f"{_safe_filename(cat_name)}.json"
+            data_file = output_dir / f'{_safe_filename(cat_name)}.json'
             row_dicts = [r.to_dict() for r in rows]
             data_file.write_text(
                 json.dumps(row_dicts, indent=2, ensure_ascii=False),
-                encoding="utf-8",
+                encoding='utf-8',
             )
             total_rows += len(rows)
             files.append(data_file.name)
-            log.info("  → %d rows → %s", len(rows), data_file.name)
+            log.info('  → %d rows → %s', len(rows), data_file.name)
 
             # Collect schema
             if include_schema:
                 try:
                     fields = session.schema.get_fields(cat_name)
                     connections = session.schema.get_connection_names(cat_name)
-                    schema_data["categories"][cat_name] = {  # type: ignore[index]
-                        "row_count": len(rows),
-                        "fields": [asdict(f) for f in fields],
-                        "connections": [asdict(c) for c in connections],
+                    schema_data['categories'][cat_name] = {  # type: ignore[index]
+                        'row_count': len(rows),
+                        'fields': [asdict(f) for f in fields],
+                        'connections': [asdict(c) for c in connections],
                     }
                 except Exception as exc:
-                    log.warning(
-                        "Failed to get schema for '%s': %s", cat_name, exc
-                    )
+                    log.warning("Failed to get schema for '%s': %s", cat_name, exc)
 
         # Write schema sidecar
         if include_schema:
-            schema_file = output_dir / "_schema.json"
+            schema_file = output_dir / '_schema.json'
             schema_file.write_text(
                 json.dumps(schema_data, indent=2, ensure_ascii=False, default=str),
-                encoding="utf-8",
+                encoding='utf-8',
             )
-            files.append("_schema.json")
-            log.info("Schema sidecar written: %s", schema_file)
+            files.append('_schema.json')
+            log.info('Schema sidecar written: %s', schema_file)
 
         summary = {
-            "db_name": session.db_name,
-            "db_path": session.db_path,
-            "timestamp": timestamp,
-            "categories_exported": len(all_cats),
-            "total_rows": total_rows,
-            "files": files,
+            'db_name': session.db_name,
+            'db_path': session.db_path,
+            'timestamp': timestamp,
+            'categories_exported': len(all_cats),
+            'total_rows': total_rows,
+            'files': files,
         }
 
         # Write summary manifest
-        manifest_file = output_dir / "_manifest.json"
+        manifest_file = output_dir / '_manifest.json'
         manifest_file.write_text(
             json.dumps(summary, indent=2, ensure_ascii=False),
-            encoding="utf-8",
+            encoding='utf-8',
         )
 
         log.info(
-            "Backup complete: %d categories, %d rows → %s",
-            len(all_cats), total_rows, output_dir,
+            'Backup complete: %d categories, %d rows → %s',
+            len(all_cats),
+            total_rows,
+            output_dir,
         )
         return summary
 
 
 def _safe_filename(name: str) -> str:
     """Convert a category name to a safe filename (no path separators)."""
-    return name.replace("/", "_").replace("\\", "_").replace(":", "_").replace(" ", "_")
-
+    return name.replace('/', '_').replace('\\', '_').replace(':', '_').replace(' ', '_')

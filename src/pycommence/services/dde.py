@@ -18,7 +18,7 @@ class DdeService:
     (or only possible) via DDE: single-item CRUD, UI commands, triggers, etc.
     """
 
-    def __init__(self, db: "CommenceDB") -> None:
+    def __init__(self, db: 'CommenceDB') -> None:
         self._db = db
         self._conv = db.get_conversation()
 
@@ -145,14 +145,14 @@ class DdeService:
             email = db.dde.get_field("Contact", "Jane Doe", "Email")
         """
         cmd = f'[GetField("{category}", "{item_name}", "{field_name}")]'
-        return self._conv.request(cmd).rstrip("\n")
+        return self._conv.request(cmd).rstrip('\n')
 
     def get_fields(
         self,
         category: str,
         item_name: str,
         *field_names: str,
-        delim: str = "|",
+        delim: str = '|',
     ) -> list[str]:
         """Read multiple field values from a single item in one DDE call.
 
@@ -178,7 +178,7 @@ class DdeService:
         fields_str = '", "'.join(field_names)
         cmd = f'[GetFields("{category}", "{item_name}", {n}, "{fields_str}", "{delim}")]'
         raw = self._conv.request(cmd)
-        return [v.rstrip("\n") for v in raw.split(delim)]
+        return [v.rstrip('\n') for v in raw.split(delim)]
 
     def get_field_to_file(
         self,
@@ -205,14 +205,11 @@ class DdeService:
             db.dde.get_field_to_file("Contact", "Jane Doe",
                                      "Photo", "C:\\\\photos\\\\jane.jpg")
         """
-        cmd = (
-            f'[GetFieldToFile("{category}", "{item_name}", '
-            f'"{field_name}", "{filename}")]'
-        )
+        cmd = f'[GetFieldToFile("{category}", "{item_name}", "{field_name}", "{filename}")]'
         self._conv.execute(cmd)
 
     # -- item enumeration ----------------------------------------------------
-    def get_item_names(self, category: str, *, delim: str = "|") -> list[str]:
+    def get_item_names(self, category: str, *, delim: str = '|') -> list[str]:
         """Return all item names (primary keys) in a category.
 
         Args:
@@ -325,7 +322,7 @@ class DdeService:
             marked = db.dde.get_mark_item("Contact")
         """
         cmd = f'[GetMarkItem("{category}")]'
-        return self._conv.request(cmd).rstrip("\n")
+        return self._conv.request(cmd).rstrip('\n')
 
     def view_mark_item(
         self,
@@ -372,7 +369,7 @@ class DdeService:
         self,
         view_name: str,
         path: str,
-        file_type: str = "HTML",
+        file_type: str = 'HTML',
     ) -> None:
         """Export a view to a file (HTML or text) via DDE.
 
@@ -414,10 +411,7 @@ class DdeService:
 
             db.dde.merge_template("Contact", "Jane Doe", "Letter", "C:\\\\out\\\\letter.doc")
         """
-        cmd = (
-            f'[MergeTemplateCreate("{category}", "{item_name}", '
-            f'"{template_name}", "{path}")]'
-        )
+        cmd = f'[MergeTemplateCreate("{category}", "{item_name}", "{template_name}", "{path}")]'
         self._conv.execute(cmd)
 
     # -- form script management ----------------------------------------------
@@ -482,7 +476,7 @@ class DdeService:
             me = db.dde.get_preference("Me")
         """
         cmd = f'[GetPreference("{pref_name}")]'
-        return self._conv.request(cmd).rstrip("\n")
+        return self._conv.request(cmd).rstrip('\n')
 
     def get_caller_id(self) -> str:
         """Return the caller-ID for the current session via DDE.
@@ -494,11 +488,11 @@ class DdeService:
 
             cid = db.dde.get_caller_id()
         """
-        cmd = "[GetCallerID()]"
-        return self._conv.request(cmd).rstrip("\n")
+        cmd = '[GetCallerID()]'
+        return self._conv.request(cmd).rstrip('\n')
 
     # -- database metadata ---------------------------------------------------
-    def get_database_definition(self, *, delim: str = "|") -> dict[str, str]:
+    def get_database_definition(self, *, delim: str = '|') -> dict[str, str]:
         """Return high-level database metadata via DDE.
 
         Args:
@@ -515,6 +509,5 @@ class DdeService:
         cmd = f'[GetDatabaseDefinition("{delim}")]'
         raw = self._conv.request(cmd)
         parts = [p.strip() for p in raw.split(delim)]
-        keys = ("name", "path", "version", "registered_user", "shared")
+        keys = ('name', 'path', 'version', 'registered_user', 'shared')
         return dict(zip(keys, parts))
-

@@ -51,7 +51,7 @@ class CommenceDB:
         self._closed = False
         self._init_thread = threading.current_thread()
         try:
-            self._db = win32com.client.Dispatch("Commence.DB")
+            self._db = win32com.client.Dispatch('Commence.DB')
         except Exception as exc:
             # Roll back the ref-count increment on failure.
             with _com_lock:
@@ -59,19 +59,18 @@ class CommenceDB:
                 if _com_init_count[tid] <= 0:
                     pythoncom.CoUninitialize()
                     _com_init_count.pop(tid, None)
-            raise CommenceNotFoundError(
-                "Could not connect to Commence. Is it running?"
-            ) from exc
-        log.info("Connected to Commence DB: %s (%s)", self.name, self.path)
+            raise CommenceNotFoundError('Could not connect to Commence. Is it running?') from exc
+        log.info('Connected to Commence DB: %s (%s)', self.name, self.path)
 
     def _check_thread(self) -> None:
         """Log a warning if called from a thread other than the init thread."""
         current = threading.current_thread()
         if current is not self._init_thread:
             log.warning(
-                "CommenceDB accessed from thread %r but was initialised on %r. "
-                "COM STA objects are NOT thread-safe.",
-                current.name, self._init_thread.name,
+                'CommenceDB accessed from thread %r but was initialised on %r. '
+                'COM STA objects are NOT thread-safe.',
+                current.name,
+                self._init_thread.name,
             )
 
     # -- properties ----------------------------------------------------------
@@ -105,7 +104,7 @@ class CommenceDB:
         name: str,
         mode: int = 0,
         flags: int = 0,
-    ) -> "CursorWrapper":
+    ) -> 'CursorWrapper':
         """Create and return a wrapped ICommenceCursor."""
         self._check_thread()
         from pycommence._com.cursor import CursorWrapper
@@ -113,22 +112,24 @@ class CommenceDB:
         raw = self._db.GetCursor(mode, name, flags)
         if raw is None:
             from pycommence.exceptions import CursorError
+
             raise CursorError(f"GetCursor failed for '{name}' (mode={mode})")
         return CursorWrapper(raw)
 
     def get_conversation(
         self,
         topic: str | None = None,
-    ) -> "ConversationWrapper":
+    ) -> 'ConversationWrapper':
         """Create and return a wrapped ICommenceConversation."""
         self._check_thread()
         from pycommence._com.conversation import ConversationWrapper
 
         # Use the DB name as topic by default (recommended by docs)
         topic = topic or self.name
-        raw = self._db.GetConversation("Commence", topic)
+        raw = self._db.GetConversation('Commence', topic)
         if raw is None:
             from pycommence.exceptions import ConversationError
+
             raise ConversationError(f"GetConversation failed for topic '{topic}'")
         return ConversationWrapper(raw)
 
@@ -144,7 +145,7 @@ class CommenceDB:
             return
         self._closed = True
         self._db = None  # type: ignore[assignment]
-        tid = (self._init_thread.ident or 0)
+        tid = self._init_thread.ident or 0
         with _com_lock:
             count = _com_init_count.get(tid, 1) - 1
             if count <= 0:
@@ -152,4 +153,3 @@ class CommenceDB:
                 _com_init_count.pop(tid, None)
             else:
                 _com_init_count[tid] = count
-

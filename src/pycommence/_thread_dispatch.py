@@ -19,7 +19,7 @@ from typing import Any, Callable, TypeVar
 
 log = logging.getLogger(__name__)
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 # Sentinel object to signal shutdown.
 _SHUTDOWN = object()
@@ -76,20 +76,20 @@ class ThreadDispatcher:
         """
         self._thread = threading.Thread(
             target=self._worker_loop,
-            name="pycommence-dispatch",
+            name='pycommence-dispatch',
             daemon=True,
         )
         self._thread.start()
         self._ready.wait(timeout=timeout)
         if self._error:
-            log.error("Dispatcher failed to start: %s", self._error)
+            log.error('Dispatcher failed to start: %s', self._error)
 
     def stop(self) -> None:
         """Signal the worker to shut down and wait for it to finish."""
         if self._thread and self._thread.is_alive():
             self._queue.put(_SHUTDOWN)
             self._thread.join(timeout=5)
-            log.info("Dispatcher stopped.")
+            log.info('Dispatcher stopped.')
 
     # -- dispatching ---------------------------------------------------------
 
@@ -100,9 +100,7 @@ class ThreadDispatcher:
         result (or exception) once the COM thread processes the call.
         """
         if not self.connected:
-            raise RuntimeError(
-                "Dispatcher not connected. Is Commence running?"
-            )
+            raise RuntimeError('Dispatcher not connected. Is Commence running?')
         future: Future[T] = Future()
 
         def _task(session: Any) -> None:
@@ -121,9 +119,7 @@ class ThreadDispatcher:
         This is the async-friendly counterpart of :meth:`submit`.
         """
         if not self.connected:
-            raise RuntimeError(
-                "Dispatcher not connected. Is Commence running?"
-            )
+            raise RuntimeError('Dispatcher not connected. Is Commence running?')
         loop = asyncio.get_running_loop()
         future: Future[T] = Future()
 
@@ -146,7 +142,7 @@ class ThreadDispatcher:
         try:
             self._session = CommenceSession()
             log.info(
-                "Dispatcher connected: %s (%s)",
+                'Dispatcher connected: %s (%s)',
                 self._session.db_name,
                 self._session.db_path,
             )
@@ -165,12 +161,11 @@ class ThreadDispatcher:
             try:
                 task_fn(self._session)
             except Exception:
-                log.debug("Dispatcher task raised", exc_info=True)
+                log.debug('Dispatcher task raised', exc_info=True)
 
         # Cleanup
         try:
             self._session.close()
         except Exception:
-            log.debug("Error closing session on dispatcher shutdown", exc_info=True)
+            log.debug('Error closing session on dispatcher shutdown', exc_info=True)
         self._session = None
-

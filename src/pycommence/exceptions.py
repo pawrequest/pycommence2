@@ -29,4 +29,3 @@ class ConversationError(CommenceError):
 
 class FilterError(CommenceError):
     """Error building or applying a filter."""
-

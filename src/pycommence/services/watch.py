@@ -46,7 +46,7 @@ class PollWatcher:
 
     def __init__(
         self,
-        reader: "ReaderService",
+        reader: 'ReaderService',
         category: str,
         *,
         columns: list[str] | None = None,
@@ -77,9 +77,7 @@ class PollWatcher:
             rid = row.row_id
             if not rid:
                 continue
-            field_hash = hashlib.md5(
-                str(sorted(row.columns.items())).encode()
-            ).hexdigest()
+            field_hash = hashlib.md5(str(sorted(row.columns.items())).encode()).hexdigest()
             snapshot[rid] = field_hash
             row_map[rid] = row
         return snapshot, row_map
@@ -96,13 +94,13 @@ class PollWatcher:
 
         for rid in curr_snapshot:
             if rid not in prev_snapshot:
-                events.append(WatchEvent(event_type="added", row=curr_rows[rid]))
+                events.append(WatchEvent(event_type='added', row=curr_rows[rid]))
             elif curr_snapshot[rid] != prev_snapshot[rid]:
-                events.append(WatchEvent(event_type="changed", row=curr_rows[rid]))
+                events.append(WatchEvent(event_type='changed', row=curr_rows[rid]))
 
         for rid in prev_snapshot:
             if rid not in curr_snapshot:
-                events.append(WatchEvent(event_type="removed", row=prev_rows[rid]))
+                events.append(WatchEvent(event_type='removed', row=prev_rows[rid]))
 
         return events
 
@@ -140,4 +138,3 @@ class PollWatcher:
         curr_snapshot, curr_rows = self._read_snapshot()
         events = self._diff(prev_snapshot, prev_rows, curr_snapshot, curr_rows)
         return events, curr_snapshot, curr_rows
-

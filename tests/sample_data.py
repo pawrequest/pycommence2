@@ -1,4 +1,3 @@
-
 CONTACT_ITEM_NAMES = [
     'Bezos.Jeff',
     'Branson.Richard',

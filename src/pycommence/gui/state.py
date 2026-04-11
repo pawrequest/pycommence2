@@ -20,7 +20,7 @@ from pycommence._thread_dispatch import ThreadDispatcher
 
 log = logging.getLogger(__name__)
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 
 class ComWorker:
@@ -55,7 +55,7 @@ class ComWorker:
         """Spawn the COM worker thread and wait for it to initialise."""
         self._dispatcher.start()
         if self._dispatcher.startup_error:
-            log.error("COM worker failed to start: %s", self._dispatcher.startup_error)
+            log.error('COM worker failed to start: %s', self._dispatcher.startup_error)
 
     def stop(self) -> None:
         """Signal the worker to shut down and wait for it to finish."""
@@ -92,4 +92,3 @@ class AppState:
 
 
 app_state = AppState()
-

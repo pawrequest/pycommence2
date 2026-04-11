@@ -30,7 +30,7 @@ class ImportService:
             print(f"Imported {result['rows_imported']} rows")
     """
 
-    def __init__(self, session: "CommenceSession") -> None:
+    def __init__(self, session: 'CommenceSession') -> None:
         self._session = session
 
     def from_csv(
@@ -39,7 +39,7 @@ class ImportService:
         path: str | Path,
         *,
         field_map: dict[str, str] | None = None,
-        encoding: str = "utf-8-sig",
+        encoding: str = 'utf-8-sig',
         max_rows: int | None = None,
         batch_size: int = 50,
         dry_run: bool = False,
@@ -71,17 +71,13 @@ class ImportService:
         path = Path(path)
         rows: list[dict[str, str]] = []
 
-        with path.open("r", encoding=encoding) as fh:
+        with path.open('r', encoding=encoding) as fh:
             reader = csv.DictReader(fh)
             for i, csv_row in enumerate(reader):
                 if max_rows is not None and i >= max_rows:
                     break
                 if field_map:
-                    mapped = {
-                        field_map[k]: v
-                        for k, v in csv_row.items()
-                        if k in field_map
-                    }
+                    mapped = {field_map[k]: v for k, v in csv_row.items() if k in field_map}
                 else:
                     mapped = {k: v for k, v in csv_row.items() if k is not None}
                 rows.append(mapped)
@@ -120,9 +116,9 @@ class ImportService:
             result = svc.from_json("Contact", "contacts.json")
         """
         path = Path(path)
-        raw = json.loads(path.read_text(encoding="utf-8"))
+        raw = json.loads(path.read_text(encoding='utf-8'))
         if not isinstance(raw, list):
-            raise ValueError(f"Expected a JSON array, got {type(raw).__name__}")
+            raise ValueError(f'Expected a JSON array, got {type(raw).__name__}')
 
         rows: list[dict[str, str]] = []
         limit = max_rows if max_rows is not None else len(raw)
@@ -130,11 +126,7 @@ class ImportService:
             if not isinstance(item, dict):
                 continue
             if field_map:
-                mapped = {
-                    field_map[k]: str(v)
-                    for k, v in item.items()
-                    if k in field_map
-                }
+                mapped = {field_map[k]: str(v) for k, v in item.items() if k in field_map}
             else:
                 mapped = {k: str(v) for k, v in item.items()}
             rows.append(mapped)
@@ -164,13 +156,14 @@ class ImportService:
         if dry_run:
             log.info(
                 "Dry run: parsed %d rows for '%s' (no data written)",
-                total_parsed, category,
+                total_parsed,
+                category,
             )
             return {
-                "rows_parsed": total_parsed,
-                "rows_imported": 0,
-                "errors": [],
-                "dry_run": True,
+                'rows_parsed': total_parsed,
+                'rows_imported': 0,
+                'errors': [],
+                'dry_run': True,
             }
 
         total_imported = 0
@@ -183,21 +176,26 @@ class ImportService:
                 total_imported += count
                 log.debug(
                     "Imported batch %d–%d (%d rows) into '%s'",
-                    i, i + len(batch) - 1, count, category,
+                    i,
+                    i + len(batch) - 1,
+                    count,
+                    category,
                 )
             except Exception as exc:
-                msg = f"Batch {i}–{i + len(batch) - 1} failed: {exc}"
+                msg = f'Batch {i}–{i + len(batch) - 1} failed: {exc}'
                 log.error(msg)
                 errors.append(msg)
 
         log.info(
             "Import complete: %d/%d rows into '%s' (%d errors)",
-            total_imported, total_parsed, category, len(errors),
+            total_imported,
+            total_parsed,
+            category,
+            len(errors),
         )
         return {
-            "rows_parsed": total_parsed,
-            "rows_imported": total_imported,
-            "errors": errors,
-            "dry_run": False,
+            'rows_parsed': total_parsed,
+            'rows_imported': total_imported,
+            'errors': errors,
+            'dry_run': False,
         }
-

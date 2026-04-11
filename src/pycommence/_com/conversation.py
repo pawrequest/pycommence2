@@ -25,7 +25,7 @@ class ConversationWrapper:
         """
         result = self._conv.Request(dde_command)
         if result is None:
-            raise ConversationError(f"Request failed: {dde_command}")
+            raise ConversationError(f'Request failed: {dde_command}')
         return result
 
     @com_retry()
@@ -33,10 +33,9 @@ class ConversationWrapper:
         """Send a DDE Execute command. Returns True on success."""
         result = self._conv.Execute(dde_command)
         if not result:
-            raise ConversationError(f"Execute failed: {dde_command}")
+            raise ConversationError(f'Execute failed: {dde_command}')
         return True
 
     @property
     def raw(self) -> Any:
         return self._conv
-

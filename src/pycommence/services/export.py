@@ -37,7 +37,7 @@ class ExportService:
         path: str | Path,
         *,
         columns: list[str] | None = None,
-        encoding: str = "utf-8-sig",
+        encoding: str = 'utf-8-sig',
     ) -> int:
         """Write rows to a CSV file.
 
@@ -58,19 +58,19 @@ class ExportService:
             svc.to_csv(rows, "partial.csv", columns=["Name", "Email"])
         """
         if not rows:
-            log.warning("to_csv: no rows to export")
+            log.warning('to_csv: no rows to export')
             return 0
 
         path = Path(path)
         fieldnames = columns or list(rows[0].columns.keys())
 
-        with path.open("w", newline="", encoding=encoding) as fh:
-            writer = csv.DictWriter(fh, fieldnames=fieldnames, extrasaction="ignore")
+        with path.open('w', newline='', encoding=encoding) as fh:
+            writer = csv.DictWriter(fh, fieldnames=fieldnames, extrasaction='ignore')
             writer.writeheader()
             for row in rows:
                 writer.writerow(row.to_dict())
 
-        log.info("Exported %d rows to %s (CSV)", len(rows), path)
+        log.info('Exported %d rows to %s (CSV)', len(rows), path)
         return len(rows)
 
     def to_json(
@@ -104,7 +104,7 @@ class ExportService:
             svc.to_json(rows, "typed.json", typed=True, fields=schema_fields)
         """
         if not rows:
-            log.warning("to_json: no rows to export")
+            log.warning('to_json: no rows to export')
             return 0
 
         path = Path(path)
@@ -120,9 +120,9 @@ class ExportService:
 
         path.write_text(
             json.dumps(data, indent=indent, ensure_ascii=False, default=str),
-            encoding="utf-8",
+            encoding='utf-8',
         )
-        log.info("Exported %d rows to %s (JSON)", len(rows), path)
+        log.info('Exported %d rows to %s (JSON)', len(rows), path)
         return len(rows)
 
     def to_excel(
@@ -131,7 +131,7 @@ class ExportService:
         path: str | Path,
         *,
         columns: list[str] | None = None,
-        sheet_name: str = "Sheet1",
+        sheet_name: str = 'Sheet1',
     ) -> int:
         """Write rows to an Excel ``.xlsx`` file.
 
@@ -159,12 +159,11 @@ class ExportService:
             from openpyxl import Workbook
         except ImportError:
             raise ImportError(
-                "Excel export requires 'openpyxl'.  Install with:\n"
-                "  pip install openpyxl"
+                "Excel export requires 'openpyxl'.  Install with:\n  pip install openpyxl"
             )
 
         if not rows:
-            log.warning("to_excel: no rows to export")
+            log.warning('to_excel: no rows to export')
             return 0
 
         path = Path(path)
@@ -182,10 +181,10 @@ class ExportService:
         for row_idx, row in enumerate(rows, 2):
             d = row.to_dict()
             for col_idx, name in enumerate(fieldnames, 1):
-                ws.cell(row=row_idx, column=col_idx, value=d.get(name, ""))
+                ws.cell(row=row_idx, column=col_idx, value=d.get(name, ''))
 
         wb.save(str(path))
-        log.info("Exported %d rows to %s (Excel)", len(rows), path)
+        log.info('Exported %d rows to %s (Excel)', len(rows), path)
         return len(rows)
 
 
@@ -203,16 +202,15 @@ def detect_format(path: str | Path) -> str:
     """
     suffix = Path(path).suffix.lower()
     mapping = {
-        ".csv": "csv",
-        ".json": "json",
-        ".xlsx": "excel",
-        ".xls": "excel",
+        '.csv': 'csv',
+        '.json': 'json',
+        '.xlsx': 'excel',
+        '.xls': 'excel',
     }
     fmt = mapping.get(suffix)
     if fmt is None:
         raise ValueError(
             f"Cannot detect format from extension '{suffix}'. "
-            f"Supported: {', '.join(mapping.keys())}"
+            f'Supported: {", ".join(mapping.keys())}'
         )
     return fmt
-

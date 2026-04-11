@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 # Delimiter we inject into DDE requests so we can split reliably
-_DELIM = "|"
+_DELIM = '|'
 
 
 class SchemaService:
@@ -36,7 +36,7 @@ class SchemaService:
     to force a fresh lookup.
     """
 
-    def __init__(self, db: "CommenceDB") -> None:
+    def __init__(self, db: 'CommenceDB') -> None:
         self._db = db
         self._conv = db.get_conversation()
         self._cache = SchemaCache(db.name, db.path)
@@ -78,7 +78,7 @@ class SchemaService:
         Returns:
             Category count as an integer.
         """
-        raw = self._conv.request("[GetCategoryCount()]")
+        raw = self._conv.request('[GetCategoryCount()]')
         return int(raw.strip())
 
     def get_category_definition(self, category: str) -> CategoryInfo:
@@ -105,26 +105,25 @@ class SchemaService:
         raw = self._conv.request(f'[GetCategoryDefinition("{category}", "{_DELIM}")]')
         parts = raw.split(_DELIM)
         if len(parts) < 2:
-            raise SchemaError(f"Unexpected GetCategoryDefinition response: {raw!r}")
+            raise SchemaError(f'Unexpected GetCategoryDefinition response: {raw!r}')
 
         try:
             max_items = int(parts[0].strip())
             # Strip whitespace/newlines from flags — docs say {C} may be
             # separated from {D} by a newline in some Commence versions.
-            flag_str = "".join(parts[1].split()).zfill(10)
+            flag_str = ''.join(parts[1].split()).zfill(10)
             # Named positions from the right: ...{S}{M}{D}{C}
-            is_shared = flag_str[-4] == "1"
+            is_shared = flag_str[-4] == '1'
             # flag_str[-3] is M (max items already parsed from parts[0])
-            allows_duplicates = flag_str[-2] == "1"
-            has_clarify = flag_str[-1] == "1"
+            allows_duplicates = flag_str[-2] == '1'
+            has_clarify = flag_str[-1] == '1'
         except (ValueError, IndexError) as exc:
             raise SchemaError(
-                f"Failed to parse GetCategoryDefinition flags for "
-                f"'{category}': {raw!r}"
+                f"Failed to parse GetCategoryDefinition flags for '{category}': {raw!r}"
             ) from exc
 
-        clarify_sep = parts[2].strip() if len(parts) > 2 else ""
-        clarify_field = parts[3].strip() if len(parts) > 3 else ""
+        clarify_sep = parts[2].strip() if len(parts) > 2 else ''
+        clarify_field = parts[3].strip() if len(parts) > 3 else ''
 
         return CategoryInfo(
             name=category,
@@ -193,26 +192,23 @@ class SchemaService:
             field = db.schema.get_field_definition("Contact", "Email")
             print(field.field_type, field.max_chars)
         """
-        raw = self._conv.request(
-            f'[GetFieldDefinition("{category}", "{field_name}", "{_DELIM}")]'
-        )
+        raw = self._conv.request(f'[GetFieldDefinition("{category}", "{field_name}", "{_DELIM}")]')
         parts = raw.split(_DELIM)
         if len(parts) < 3:
             raise SchemaError(
-                f"Unexpected GetFieldDefinition response for "
-                f"'{category}'.'{field_name}': {raw!r}"
+                f"Unexpected GetFieldDefinition response for '{category}'.'{field_name}': {raw!r}"
             )
 
         field_type_code = int(parts[0].strip())
         flags = parts[1].strip().zfill(10)
         # flags: 000000{C}{S}{M}{R}
-        is_combo = flags[-4] == "1"
-        is_shared = flags[-3] == "1"
-        is_mandatory = flags[-2] == "1"
-        is_recurring = flags[-1] == "1"
+        is_combo = flags[-4] == '1'
+        is_shared = flags[-3] == '1'
+        is_mandatory = flags[-2] == '1'
+        is_recurring = flags[-1] == '1'
 
         max_chars = int(parts[2].strip()) if parts[2].strip() else 0
-        default = parts[3].strip() if len(parts) > 3 else ""
+        default = parts[3].strip() if len(parts) > 3 else ''
 
         return FieldInfo(
             name=field_name,
@@ -247,14 +243,14 @@ class SchemaService:
         if cached_dicts is not None:
             return [
                 FieldInfo(
-                    name=d["name"],
-                    field_type=FieldType.from_code(d["field_type"]),
-                    max_chars=d.get("max_chars", 0),
-                    default=d.get("default", ""),
-                    is_combo=d.get("is_combo", False),
-                    is_shared=d.get("is_shared", False),
-                    is_mandatory=d.get("is_mandatory", False),
-                    is_recurring=d.get("is_recurring", False),
+                    name=d['name'],
+                    field_type=FieldType.from_code(d['field_type']),
+                    max_chars=d.get('max_chars', 0),
+                    default=d.get('default', ''),
+                    is_combo=d.get('is_combo', False),
+                    is_shared=d.get('is_shared', False),
+                    is_mandatory=d.get('is_mandatory', False),
+                    is_recurring=d.get('is_recurring', False),
                 )
                 for d in cached_dicts
             ]
@@ -291,30 +287,27 @@ class SchemaService:
         cached_dicts = self._cache.get_connections(category)
         if cached_dicts is not None:
             return [
-                ConnectionInfo(name=d["name"], to_category=d["to_category"])
-                for d in cached_dicts
+                ConnectionInfo(name=d['name'], to_category=d['to_category']) for d in cached_dicts
             ]
 
-        raw = self._conv.request(
-            f'[GetConnectionNames("{category}", "{_DELIM}", "::")]'
-        )
+        raw = self._conv.request(f'[GetConnectionNames("{category}", "{_DELIM}", "::")]')
         connections: list[ConnectionInfo] = []
         for entry in raw.split(_DELIM):
             entry = entry.strip()
             if not entry:
                 continue
-            if "::" in entry:
-                conn_name, to_cat = entry.split("::", 1)
+            if '::' in entry:
+                conn_name, to_cat = entry.split('::', 1)
                 connections.append(
                     ConnectionInfo(name=conn_name.strip(), to_category=to_cat.strip())
                 )
             else:
                 # Fallback: if no delimiter between conn/cat, treat whole thing as name
-                connections.append(ConnectionInfo(name=entry, to_category=""))
+                connections.append(ConnectionInfo(name=entry, to_category=''))
 
         self._cache.set_connections(
             category,
-            [{"name": c.name, "to_category": c.to_category} for c in connections],
+            [{'name': c.name, 'to_category': c.to_category} for c in connections],
         )
         self._cache.save()
         return connections

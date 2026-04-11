@@ -217,7 +217,11 @@ class CommenceSession:
             )
         """
         self._connections.assign(
-            from_category, from_item, connection_name, to_category, to_item,
+            from_category,
+            from_item,
+            connection_name,
+            to_category,
+            to_item,
         )
 
     def unassign_connection(
@@ -249,7 +253,11 @@ class CommenceSession:
             )
         """
         self._connections.unassign(
-            from_category, from_item, connection_name, to_category, to_item,
+            from_category,
+            from_item,
+            connection_name,
+            to_category,
+            to_item,
         )
 
     # -- READ shortcuts ------------------------------------------------------
@@ -289,8 +297,13 @@ class CommenceSession:
                 print(row["Name"], row["Email"])
         """
         return self._reader.read_rows(
-            category, columns=columns, filters=filters, logic=logic,
-            sort=sort, max_rows=max_rows, canonical=canonical,
+            category,
+            columns=columns,
+            filters=filters,
+            logic=logic,
+            sort=sort,
+            max_rows=max_rows,
+            canonical=canonical,
         )
 
     def read_by_id(
@@ -322,7 +335,10 @@ class CommenceSession:
             print(row["Email"])
         """
         return self._reader.read_by_id(
-            category, row_id, columns=columns, canonical=canonical,
+            category,
+            row_id,
+            columns=columns,
+            canonical=canonical,
         )
 
     def query(self, category: str) -> QueryBuilder:
@@ -463,7 +479,11 @@ class CommenceSession:
             )
         """
         return self._writer.edit_rows(
-            category, fields, filters=filters, logic=logic, max_rows=max_rows,
+            category,
+            fields,
+            filters=filters,
+            logic=logic,
+            max_rows=max_rows,
         )
 
     # -- DELETE shortcut -----------------------------------------------------
@@ -511,7 +531,10 @@ class CommenceSession:
             )
         """
         return self._writer.delete_rows(
-            category, filters=filters, logic=logic, max_rows=max_rows,
+            category,
+            filters=filters,
+            logic=logic,
+            max_rows=max_rows,
         )
 
     # -- EXPORT shortcuts ----------------------------------------------------
@@ -561,14 +584,14 @@ class CommenceSession:
             max_rows=max_rows,
             canonical=canonical,
         )
-        if fmt == "csv":
+        if fmt == 'csv':
             return self._export.to_csv(rows, path, columns=columns)
-        elif fmt == "json":
+        elif fmt == 'json':
             return self._export.to_json(rows, path, columns=columns)
-        elif fmt == "excel":
+        elif fmt == 'excel':
             return self._export.to_excel(rows, path, columns=columns)
         else:
-            raise ValueError(f"Unknown export format: {fmt!r}")
+            raise ValueError(f'Unknown export format: {fmt!r}')
 
     def backup(
         self,
@@ -632,8 +655,11 @@ class CommenceSession:
             result = db.import_csv("Contact", "contacts.csv")
         """
         return self._import.from_csv(
-            category, path, field_map=field_map,
-            max_rows=max_rows, dry_run=dry_run,
+            category,
+            path,
+            field_map=field_map,
+            max_rows=max_rows,
+            dry_run=dry_run,
         )
 
     def import_json(
@@ -663,8 +689,11 @@ class CommenceSession:
             result = db.import_json("Contact", "contacts.json")
         """
         return self._import.from_json(
-            category, path, field_map=field_map,
-            max_rows=max_rows, dry_run=dry_run,
+            category,
+            path,
+            field_map=field_map,
+            max_rows=max_rows,
+            dry_run=dry_run,
         )
 
     # -- BULK shortcuts -------------------------------------------------------
@@ -695,7 +724,10 @@ class CommenceSession:
             ])
         """
         return self._writer.upsert_rows(
-            category, pk_field, rows, reader=self._reader,
+            category,
+            pk_field,
+            rows,
+            reader=self._reader,
         )
 
     def copy_category(
@@ -725,9 +757,12 @@ class CommenceSession:
             )
         """
         from pycommence.services.migration import copy_category
+
         return copy_category(
-            self._reader, self._writer,
-            from_category, to_category,
+            self._reader,
+            self._writer,
+            from_category,
+            to_category,
             field_map=field_map,
             max_rows=max_rows,
         )
@@ -763,10 +798,14 @@ class CommenceSession:
                 print(event.event_type, event.row["Name"])
         """
         from pycommence.services.watch import PollWatcher
+
         watcher = PollWatcher(
-            self._reader, category,
-            columns=columns, filters=filters,
-            interval=interval, max_rows=max_rows,
+            self._reader,
+            category,
+            columns=columns,
+            filters=filters,
+            interval=interval,
+            max_rows=max_rows,
         )
         yield from watcher
 
@@ -808,12 +847,11 @@ class CommenceSession:
         """
         self._db.close()
 
-    def __enter__(self) -> "CommenceSession":
+    def __enter__(self) -> 'CommenceSession':
         return self
 
     def __exit__(self, *exc: object) -> None:
         self.close()
 
     def __repr__(self) -> str:
-        return f"<CommenceSession db={self.db_name!r}>"
-
+        return f'<CommenceSession db={self.db_name!r}>'

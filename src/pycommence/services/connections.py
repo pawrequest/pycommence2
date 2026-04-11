@@ -19,7 +19,7 @@ class ConnectionService:
     API — they **must** use DDE Execute commands.
     """
 
-    def __init__(self, db: "CommenceDB") -> None:
+    def __init__(self, db: 'CommenceDB') -> None:
         self._db = db
         self._conv = db.get_conversation()
 
@@ -58,8 +58,12 @@ class ConnectionService:
         )
         self._conv.execute(cmd)
         log.info(
-            "Assigned connection: %s/%s -[%s]-> %s/%s",
-            from_category, from_item, connection_name, to_category, to_item,
+            'Assigned connection: %s/%s -[%s]-> %s/%s',
+            from_category,
+            from_item,
+            connection_name,
+            to_category,
+            to_item,
         )
 
     def unassign(
@@ -96,8 +100,12 @@ class ConnectionService:
         )
         self._conv.execute(cmd)
         log.info(
-            "Unassigned connection: %s/%s -[%s]-> %s/%s",
-            from_category, from_item, connection_name, to_category, to_item,
+            'Unassigned connection: %s/%s -[%s]-> %s/%s',
+            from_category,
+            from_item,
+            connection_name,
+            to_category,
+            to_item,
         )
 
     # -- query ---------------------------------------------------------------
@@ -108,7 +116,7 @@ class ConnectionService:
         connection_name: str,
         to_category: str,
         *,
-        delim: str = "|",
+        delim: str = '|',
     ) -> list[str]:
         """Return the names of items connected to *from_item*.
 
@@ -177,7 +185,7 @@ class ConnectionService:
         to_category: str,
         field_name: str,
         *,
-        delim: str = "|",
+        delim: str = '|',
     ) -> list[str]:
         """Return a specific field value from each connected item.
 

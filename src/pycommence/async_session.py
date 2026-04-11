@@ -43,7 +43,7 @@ class AsyncCommenceSession:
 
     # -- async context manager -----------------------------------------------
 
-    async def __aenter__(self) -> "AsyncCommenceSession":
+    async def __aenter__(self) -> 'AsyncCommenceSession':
         self._dispatcher.start()
         if self._dispatcher.startup_error:
             raise self._dispatcher.startup_error
@@ -111,7 +111,8 @@ class AsyncCommenceSession:
             List of :class:`~pycommence.models.FieldInfo` objects.
         """
         return await self._dispatcher.run(
-            lambda s, c: s.schema.get_fields(c), category,
+            lambda s, c: s.schema.get_fields(c),
+            category,
         )
 
     async def get_connections(self, category: str) -> list[Any]:
@@ -121,13 +122,15 @@ class AsyncCommenceSession:
             List of :class:`~pycommence.models.ConnectionInfo` objects.
         """
         return await self._dispatcher.run(
-            lambda s, c: s.schema.get_connection_names(c), category,
+            lambda s, c: s.schema.get_connection_names(c),
+            category,
         )
 
     async def get_row_count(self, category: str) -> int:
         """Return the number of rows in a category."""
         return await self._dispatcher.run(
-            lambda s, c: s.schema.get_row_count(c), category,
+            lambda s, c: s.schema.get_row_count(c),
+            category,
         )
 
     # -- READ shortcuts ------------------------------------------------------
@@ -170,7 +173,10 @@ class AsyncCommenceSession:
         """Read a single row by its unique ID."""
         return await self._dispatcher.run(
             lambda s: s.read_by_id(
-                category, row_id, columns=columns, canonical=canonical,
+                category,
+                row_id,
+                columns=columns,
+                canonical=canonical,
             ),
         )
 
@@ -197,6 +203,7 @@ class AsyncCommenceSession:
             limit: Maximum rows.
             canonical: Locale-independent formatting.
         """
+
         def _run(s: Any) -> list[RowResult]:
             qb = s.query(category)
             if columns:
@@ -225,6 +232,7 @@ class AsyncCommenceSession:
             category: Commence category name.
             filters: List of ``(field, qualifier, value)`` tuples.
         """
+
         def _run(s: Any) -> int:
             qb = s.query(category)
             if filters:
@@ -285,8 +293,11 @@ class AsyncCommenceSession:
         """
         return await self._dispatcher.run(
             lambda s: s.edit_where(
-                category, fields,
-                filters=filters, logic=logic, max_rows=max_rows,
+                category,
+                fields,
+                filters=filters,
+                logic=logic,
+                max_rows=max_rows,
             ),
         )
 
@@ -313,7 +324,10 @@ class AsyncCommenceSession:
         """
         return await self._dispatcher.run(
             lambda s: s.delete_where(
-                category, filters=filters, logic=logic, max_rows=max_rows,
+                category,
+                filters=filters,
+                logic=logic,
+                max_rows=max_rows,
             ),
         )
 
@@ -330,7 +344,11 @@ class AsyncCommenceSession:
         """Create a connection between two items."""
         await self._dispatcher.run(
             lambda s: s.assign_connection(
-                from_category, from_item, connection_name, to_category, to_item,
+                from_category,
+                from_item,
+                connection_name,
+                to_category,
+                to_item,
             ),
         )
 
@@ -345,7 +363,11 @@ class AsyncCommenceSession:
         """Remove a connection between two items."""
         await self._dispatcher.run(
             lambda s: s.unassign_connection(
-                from_category, from_item, connection_name, to_category, to_item,
+                from_category,
+                from_item,
+                connection_name,
+                to_category,
+                to_item,
             ),
         )
 
@@ -370,9 +392,14 @@ class AsyncCommenceSession:
         """
         return await self._dispatcher.run(
             lambda s: s.export(
-                category, path,
-                format=format, columns=columns, filters=filters,
-                logic=logic, max_rows=max_rows, canonical=canonical,
+                category,
+                path,
+                format=format,
+                columns=columns,
+                filters=filters,
+                logic=logic,
+                max_rows=max_rows,
+                canonical=canonical,
             ),
         )
 
@@ -414,8 +441,11 @@ class AsyncCommenceSession:
         """
         return await self._dispatcher.run(
             lambda s: s.import_csv(
-                category, path,
-                field_map=field_map, max_rows=max_rows, dry_run=dry_run,
+                category,
+                path,
+                field_map=field_map,
+                max_rows=max_rows,
+                dry_run=dry_run,
             ),
         )
 
@@ -435,15 +465,21 @@ class AsyncCommenceSession:
         """
         return await self._dispatcher.run(
             lambda s: s.import_json(
-                category, path,
-                field_map=field_map, max_rows=max_rows, dry_run=dry_run,
+                category,
+                path,
+                field_map=field_map,
+                max_rows=max_rows,
+                dry_run=dry_run,
             ),
         )
 
     # -- DDE shortcuts -------------------------------------------------------
 
     async def dde_get_field(
-        self, category: str, item_name: str, field_name: str,
+        self,
+        category: str,
+        item_name: str,
+        field_name: str,
     ) -> str:
         """Read a single field value from an item via DDE."""
         return await self._dispatcher.run(
@@ -494,8 +530,10 @@ class AsyncCommenceSession:
         """
         return await self._dispatcher.run(
             lambda s: s.copy_category(
-                from_category, to_category,
-                field_map=field_map, max_rows=max_rows,
+                from_category,
+                to_category,
+                field_map=field_map,
+                max_rows=max_rows,
             ),
         )
 
@@ -538,19 +576,20 @@ class AsyncCommenceSession:
 
         while True:
             rows = await self.read(
-                category, columns=columns, filters=filters,
-                max_rows=max_rows, canonical=True,
+                category,
+                columns=columns,
+                filters=filters,
+                max_rows=max_rows,
+                canonical=True,
             )
             current_snapshot: dict[str, str] = {}
             current_rows: dict[str, Any] = {}
 
             for row in rows:
-                rid = row.row_id or ""
+                rid = row.row_id or ''
                 if not rid:
                     continue
-                field_hash = hashlib.md5(
-                    str(sorted(row.columns.items())).encode()
-                ).hexdigest()
+                field_hash = hashlib.md5(str(sorted(row.columns.items())).encode()).hexdigest()
                 current_snapshot[rid] = field_hash
                 current_rows[rid] = row
 
@@ -559,17 +598,17 @@ class AsyncCommenceSession:
             # Detect added
             for rid in current_snapshot:
                 if rid not in prev_snapshot:
-                    yield WatchEvent(event_type="added", row=current_rows[rid])
+                    yield WatchEvent(event_type='added', row=current_rows[rid])
 
             # Detect changed
             for rid in current_snapshot:
                 if rid in prev_snapshot and current_snapshot[rid] != prev_snapshot[rid]:
-                    yield WatchEvent(event_type="changed", row=current_rows[rid])
+                    yield WatchEvent(event_type='changed', row=current_rows[rid])
 
             # Detect removed
             for rid in prev_snapshot:
                 if rid not in current_snapshot:
-                    yield WatchEvent(event_type="removed", row=prev_rows[rid])
+                    yield WatchEvent(event_type='removed', row=prev_rows[rid])
 
             prev_snapshot = current_snapshot
             prev_rows = current_rows
@@ -578,6 +617,5 @@ class AsyncCommenceSession:
     # -- repr ----------------------------------------------------------------
 
     def __repr__(self) -> str:
-        status = "connected" if self._dispatcher.connected else "disconnected"
-        return f"<AsyncCommenceSession {status}>"
-
+        status = 'connected' if self._dispatcher.connected else 'disconnected'
+        return f'<AsyncCommenceSession {status}>'

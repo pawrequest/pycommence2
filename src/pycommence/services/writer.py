@@ -23,7 +23,7 @@ class WriterService:
     All mutations go through the cursor/rowset API (Add/Edit/DeleteRowSet).
     """
 
-    def __init__(self, db: "CommenceDB") -> None:
+    def __init__(self, db: 'CommenceDB') -> None:
         self._db = db
 
     # -- CREATE --------------------------------------------------------------
@@ -217,7 +217,6 @@ class WriterService:
             The number of rows deleted.
         """
         with self._db.get_cursor(category) as cur:
-
             if filters:
                 for f in filters:
                     cur.set_filter(f)
@@ -244,7 +243,7 @@ class WriterService:
         pk_field: str,
         rows: list[dict[str, str]],
         *,
-        reader: "ReaderService | None" = None,
+        reader: 'ReaderService | None' = None,
     ) -> dict[str, int]:
         """Add-or-update rows based on primary-key match.
 
@@ -271,6 +270,7 @@ class WriterService:
         """
         if reader is None:
             from pycommence.services.reader import ReaderService
+
             reader = ReaderService(self._db)
 
         added = 0
@@ -278,15 +278,13 @@ class WriterService:
         unchanged = 0
 
         for row in rows:
-            pk_value = row.get(pk_field, "")
+            pk_value = row.get(pk_field, '')
             if not pk_value:
-                log.warning("Skipping row with empty pk_field %r", pk_field)
+                log.warning('Skipping row with empty pk_field %r', pk_field)
                 continue
 
             # Look up existing row by PK filter
-            filter_clause = (
-                f'[ViewFilter(1, F, , "{pk_field}", "Equal To", "{pk_value}", False)]'
-            )
+            filter_clause = f'[ViewFilter(1, F, , "{pk_field}", "Equal To", "{pk_value}", False)]'
             existing = reader.read_rows(
                 category,
                 columns=[pk_field],
@@ -309,5 +307,4 @@ class WriterService:
                 self.add_row(category, row)
                 added += 1
 
-        return {"added": added, "updated": updated, "unchanged": unchanged}
-
+        return {'added': added, 'updated': updated, 'unchanged': unchanged}

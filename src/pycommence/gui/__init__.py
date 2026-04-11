@@ -33,8 +33,7 @@ def create_app() -> None:
 
     if not state.worker.connected:
         log.error(
-            "GUI starting in disconnected mode — Commence is not running "
-            "or no database is open."
+            'GUI starting in disconnected mode — Commence is not running or no database is open.'
         )
 
     # Register all page routes
@@ -48,13 +47,13 @@ def create_app() -> None:
     # Clean shutdown
     app.on_shutdown(lambda: state.worker.stop() if state.worker else None)
 
-    log.info("pycommence GUI app configured.")
+    log.info('pycommence GUI app configured.')
 
 
 def run(
     *,
     native: bool = True,
-    title: str = "pycommence",
+    title: str = 'pycommence',
     port: int = 0,
     reload: bool = False,
 ) -> None:
@@ -76,4 +75,3 @@ def run(
         reload=reload,
         window_size=(1280, 800),
     )
-

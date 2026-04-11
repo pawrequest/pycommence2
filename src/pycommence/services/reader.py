@@ -25,7 +25,7 @@ class ReaderService:
     per-request data limits.
     """
 
-    def __init__(self, db: "CommenceDB") -> None:
+    def __init__(self, db: 'CommenceDB') -> None:
         self._db = db
 
     def read_rows(
@@ -164,6 +164,7 @@ class ReaderService:
             rs = cur.get_query_rowset_by_id(row_id)
             if rs.row_count == 0:
                 from pycommence.exceptions import RowsetError
+
                 raise RowsetError(f"No row found for ID '{row_id}' in '{category}'")
 
             labels = rs.column_labels()
@@ -199,4 +200,3 @@ class ReaderService:
                 if logic:
                     cur.set_logic(logic)
             return cur.row_count
-

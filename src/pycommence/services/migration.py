@@ -13,8 +13,8 @@ log = logging.getLogger(__name__)
 
 
 def copy_category(
-    reader: "ReaderService",
-    writer: "WriterService",
+    reader: 'ReaderService',
+    writer: 'WriterService',
     from_category: str,
     to_category: str,
     field_map: dict[str, str] | None = None,
@@ -54,7 +54,7 @@ def copy_category(
         get_ids=False,
     )
     if not source_rows:
-        log.info("No rows found in %s", from_category)
+        log.info('No rows found in %s', from_category)
         return 0
 
     mapped_rows: list[dict[str, str]] = []
@@ -74,8 +74,9 @@ def copy_category(
 
     count = writer.add_rows(to_category, mapped_rows)
     log.info(
-        "Copied %d rows from %s → %s",
-        count, from_category, to_category,
+        'Copied %d rows from %s → %s',
+        count,
+        from_category,
+        to_category,
     )
     return count
-

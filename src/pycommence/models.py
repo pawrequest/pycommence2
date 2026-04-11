@@ -35,7 +35,7 @@ class FieldType(IntEnum):
     URL = 24
 
     @classmethod
-    def from_code(cls, code: int) -> "FieldType":
+    def from_code(cls, code: int) -> 'FieldType':
         """Convert a raw integer code to a ``FieldType``.
 
         Falls back to ``TEXT`` for unrecognised codes.
@@ -73,7 +73,7 @@ class FieldInfo:
     name: str
     field_type: FieldType
     max_chars: int = 0
-    default: str = ""
+    default: str = ''
     is_combo: bool = False
     is_shared: bool = False
     is_mandatory: bool = False
@@ -112,8 +112,8 @@ class CategoryInfo:
     is_shared: bool = False
     allows_duplicates: bool = False
     has_clarify: bool = False
-    clarify_separator: str = ""
-    clarify_field: str = ""
+    clarify_separator: str = ''
+    clarify_field: str = ''
 
 
 # ---------------------------------------------------------------------------
@@ -163,7 +163,7 @@ class RowResult:
         """Return the number of columns in this row."""
         return len(self.columns)
 
-    def get(self, key: str, default: str = "") -> str:
+    def get(self, key: str, default: str = '') -> str:
         """Get a field value by name, returning *default* if missing."""
         return self.columns.get(key, default)
 
@@ -192,7 +192,7 @@ class RowResult:
         """
         return dict(self.columns)
 
-    def to_typed_dict(self, fields: list["FieldInfo"]) -> dict[str, Any]:
+    def to_typed_dict(self, fields: list['FieldInfo']) -> dict[str, Any]:
         """Coerce string values to Python types based on field metadata.
 
         Requires **canonical mode** data for reliable parsing of dates,
@@ -227,26 +227,32 @@ class RowResult:
         return result
 
 
-def _coerce_value(raw: str, ft: "FieldType") -> Any:
+def _coerce_value(raw: str, ft: 'FieldType') -> Any:
     """Convert a raw string value to a Python type based on field type."""
     if not raw:
         # Empty string → None for non-text types, "" for text
-        if ft in (FieldType.TEXT, FieldType.NAME, FieldType.EMAIL,
-                  FieldType.URL, FieldType.TELEPHONE, FieldType.SELECTION):
+        if ft in (
+            FieldType.TEXT,
+            FieldType.NAME,
+            FieldType.EMAIL,
+            FieldType.URL,
+            FieldType.TELEPHONE,
+            FieldType.SELECTION,
+        ):
             return raw
         return None
 
     if ft in (FieldType.NUMBER, FieldType.CALCULATION):
         try:
             # Try int first, then float
-            if "." in raw:
+            if '.' in raw:
                 return float(raw)
             return int(raw)
         except ValueError:
             return raw
 
     if ft == FieldType.CHECK_BOX:
-        return raw.upper() in ("TRUE", "YES", "1")
+        return raw.upper() in ('TRUE', 'YES', '1')
 
     if ft == FieldType.DATE:
         # Canonical format: yyyymmdd
@@ -260,8 +266,8 @@ def _coerce_value(raw: str, ft: "FieldType") -> Any:
     if ft == FieldType.TIME:
         # Canonical format: hh:mm
         try:
-            if ":" in raw:
-                parts = raw.split(":")
+            if ':' in raw:
+                parts = raw.split(':')
                 return time(int(parts[0]), int(parts[1]))
         except (ValueError, IndexError):
             pass
@@ -290,7 +296,7 @@ class WatchEvent:
     """
 
     event_type: str  # "added", "changed", "removed"
-    row: "RowResult" = field(default_factory=lambda: RowResult())
+    row: 'RowResult' = field(default_factory=lambda: RowResult())
 
 
 # ---------------------------------------------------------------------------
@@ -306,10 +312,10 @@ class FilterType:
         CONNECTION_TO_CATEGORY_FIELD: Connection field filter (``"CTCF"``).
     """
 
-    FIELD = "F"
-    CONNECTION_TO_ITEM = "CTI"
-    CONNECTION_TO_CATEGORY_TO_ITEM = "CTCTI"
-    CONNECTION_TO_CATEGORY_FIELD = "CTCF"
+    FIELD = 'F'
+    CONNECTION_TO_ITEM = 'CTI'
+    CONNECTION_TO_CATEGORY_TO_ITEM = 'CTCTI'
+    CONNECTION_TO_CATEGORY_FIELD = 'CTCF'
 
 
 @dataclass(slots=True)
@@ -360,4 +366,3 @@ class RelatedColumn:
     connection_name: str
     connected_category: str
     field_name: str
-

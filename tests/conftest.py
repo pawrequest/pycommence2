@@ -11,7 +11,7 @@ import pytest
 from pycommence import CommenceSession
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def session() -> CommenceSession:
     """A single CommenceSession shared across the entire test session.
 
@@ -36,5 +36,3 @@ async def async_session():
 
     async with AsyncCommenceSession() as db:
         yield db
-
-
