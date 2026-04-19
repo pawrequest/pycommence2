@@ -34,6 +34,7 @@ def frame(title: str = '') -> Generator[None, None, None]:
             ui.link('pycommence', '/').classes('text-white text-lg font-bold no-underline')
             ui.link('Dashboard', '/').classes('text-white no-underline')
             ui.link('Browse', '/browse').classes('text-white no-underline')
+            ui.link('Email', '/emailer').classes('text-white no-underline')
             ui.link('Schema', '/schema').classes('text-white no-underline')
             ui.link('Export', '/export').classes('text-white no-underline')
             ui.link('DDE Console', '/dde').classes('text-white no-underline')

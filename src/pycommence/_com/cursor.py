@@ -47,24 +47,15 @@ class CursorWrapper:
             if not self._cur.SetColumn(idx, name, 0):
                 raise CursorError(f"SetColumn({idx}, '{name}') failed")
 
-    def set_columns_all(self) -> None:
-        """No-op for category-mode cursors which already include all fields.
-
-        When a cursor is opened in ``CMC_CURSOR_CATEGORY`` mode the default
-        column set already contains every supported field, so no ``SetColumn``
-        call is required.  Do **not** call this on view cursors — use
-        :meth:`set_columns` explicitly instead.
-        """
-
     def set_related_column(
-        self,
-        col_index: int,
-        connection_name: str,
-        connected_category: str,
-        field_name: str,
+            self,
+            col_index: int,
+            connection_name: str,
+            connected_category: str,
+            field_name: str,
     ) -> None:
         if not self._cur.SetRelatedColumn(
-            col_index, connection_name, connected_category, field_name, 0
+                col_index, connection_name, connected_category, field_name, 0
         ):
             raise CursorError(
                 f"SetRelatedColumn({col_index}, '{connection_name}', "

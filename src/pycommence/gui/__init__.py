@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import logging
 
+from pycommence.gui import emailer_page
+
 log = logging.getLogger(__name__)
 
 
@@ -25,6 +27,7 @@ def create_app() -> None:
         detail,
         export_dialog,
         schema_explorer,
+        emailer_page,
     )
 
     # Start the COM worker
@@ -43,6 +46,7 @@ def create_app() -> None:
     schema_explorer.register()
     export_dialog.register()
     dde_console.register()
+    emailer_page.register()
 
     # Clean shutdown
     app.on_shutdown(lambda: state.worker.stop() if state.worker else None)
@@ -75,3 +79,6 @@ def run(
         reload=reload,
         window_size=(1280, 800),
     )
+
+if __name__ == '__main__':
+    run()

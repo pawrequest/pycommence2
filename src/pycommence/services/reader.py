@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 # Default batch size when paging through large result sets
-_DEFAULT_BATCH = 200
+_DEFAULT_BATCH = 2000
 
 
 class ReaderService:
@@ -29,18 +29,18 @@ class ReaderService:
         self._db = db
 
     def read_rows(
-        self,
-        category: str,
-        *,
-        columns: list[str] | None = None,
-        related_columns: list[RelatedColumn] | None = None,
-        filters: list[str] | None = None,
-        logic: str | None = None,
-        sort: str | None = None,
-        max_rows: int = 500,
-        get_ids: bool = True,
-        canonical: bool = False,
-        mode: int = CMC_CURSOR_CATEGORY,
+            self,
+            category: str,
+            *,
+            columns: list[str] | None = None,
+            related_columns: list[RelatedColumn] | None = None,
+            filters: list[str] | None = None,
+            logic: str | None = None,
+            sort: str | None = None,
+            max_rows: int = 500,
+            get_ids: bool = True,
+            canonical: bool = False,
+            mode: int = CMC_CURSOR_CATEGORY,
     ) -> Generator[RowResult, None, None]:
         """Read rows from a category with optional filtering and sorting.
 
@@ -76,10 +76,6 @@ class ReaderService:
             if columns:
                 cur.set_columns(columns)
                 num_direct = len(columns)
-            else:
-                # cur.set_columns_all()
-                pass
-                # column count will be determined from the rowset
 
             # related (indirect) columns
             if related_columns:
@@ -123,17 +119,12 @@ class ReaderService:
                 labels = rs.column_labels()
                 for r in range(rs.row_count):
                     delim = '/**/?'
-                    row = rs.get_row(r, delim, canonical=canonical)
-                    split = row.split(delim)
-                    if len(labels) != len(split):
+                    row = rs.get_row(r, delim, canonical=canonical).split(delim)
+                    if len(labels) != len(row):
                         raise ValueError(
-                            f'Column count mismatch: expected {len(labels)} columns but got {len(split)} values in row {r}'
+                            f'Column count mismatch: expected {len(labels)} columns but got {len(row)} values in row {r}'
                         )
-                    row_data = dict(zip(labels, split))
-                    # row_data = {
-                    #     labels[c]: rs.get_row_value(r, c, canonical=canonical)
-                    #     for c in range(rs.column_count)
-                    # }
+                    row_data = dict(zip(labels, row))
                     row_id = rs.get_row_id(r) if get_ids else None
                     yield RowResult(columns=row_data, row_id=row_id)
                     # results.append(RowResult(columns=row_data, row_id=row_id))
@@ -142,12 +133,12 @@ class ReaderService:
                     break  # no more rows
 
     def read_by_id(
-        self,
-        category: str,
-        row_id: str,
-        *,
-        columns: list[str] | None = None,
-        canonical: bool = False,
+            self,
+            category: str,
+            row_id: str,
+            *,
+            columns: list[str] | None = None,
+            canonical: bool = False,
     ) -> RowResult:
         """Read a single row by its unique row ID.
 
@@ -166,8 +157,6 @@ class ReaderService:
         with self._db.get_cursor(category) as cur:
             if columns:
                 cur.set_columns(columns)
-            else:
-                cur.set_columns_all()
 
             rs = cur.get_query_rowset_by_id(row_id)
             if rs.row_count == 0:
@@ -183,12 +172,12 @@ class ReaderService:
             return RowResult(columns=row_data, row_id=row_id)
 
     def count(
-        self,
-        category: str,
-        *,
-        filters: list[str] | None = None,
-        logic: str | None = None,
-        mode: int = CMC_CURSOR_CATEGORY,
+            self,
+            category: str,
+            *,
+            filters: list[str] | None = None,
+            logic: str | None = None,
+            mode: int = CMC_CURSOR_CATEGORY,
     ) -> int:
         """Return the number of rows in a category, respecting optional filters.
 

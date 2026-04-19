@@ -161,3 +161,4 @@ cython_debug/
 /docs_src/reference/build/
 /play.py
 /tests/dumped*
+/data/

@@ -244,7 +244,6 @@ def _coerce_value(raw: str, ft: 'FieldType') -> Any:
 
     if ft in (FieldType.NUMBER, FieldType.CALCULATION):
         try:
-            # Try int first, then float
             if '.' in raw:
                 return float(raw)
             return int(raw)

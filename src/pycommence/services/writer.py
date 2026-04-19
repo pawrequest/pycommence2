@@ -28,9 +28,9 @@ class WriterService:
 
     # -- CREATE --------------------------------------------------------------
     def add_row(
-        self,
-        category: str,
-        fields: dict[str, str],
+            self,
+            category: str,
+            fields: dict[str, str],
     ) -> str | None:
         """Add a single row to *category* and return its row ID (if obtainable).
 
@@ -49,10 +49,6 @@ class WriterService:
             new_id = session.add("Contact", {"Name": "Jane Doe"})
         """
         with self._db.get_cursor(category) as cur:
-            # We need the columns in the cursor to match the fields we want to set.
-            # Using all columns so GetColumnIndex works for any field.
-            cur.set_columns_all()
-
             rs = cur.get_add_rowset(1)
             for field_name, value in fields.items():
                 col_idx = rs.get_column_index(field_name)
@@ -69,9 +65,9 @@ class WriterService:
             return None
 
     def add_rows(
-        self,
-        category: str,
-        rows: list[dict[str, str]],
+            self,
+            category: str,
+            rows: list[dict[str, str]],
     ) -> int:
         """Add multiple rows in a single batch.
 
@@ -93,7 +89,6 @@ class WriterService:
             return 0
 
         with self._db.get_cursor(category) as cur:
-            cur.set_columns_all()
             rs = cur.get_add_rowset(count)
 
             for row_idx, field_values in enumerate(rows):
@@ -106,10 +101,10 @@ class WriterService:
 
     # -- UPDATE --------------------------------------------------------------
     def edit_row_by_id(
-        self,
-        category: str,
-        row_id: str,
-        fields: dict[str, str],
+            self,
+            category: str,
+            row_id: str,
+            fields: dict[str, str],
     ) -> None:
         """Edit a single row identified by its unique row ID.
 
@@ -122,7 +117,6 @@ class WriterService:
             RowsetError: If no row matches the given ID.
         """
         with self._db.get_cursor(category) as cur:
-            cur.set_columns_all()
             rs = cur.get_edit_rowset_by_id(row_id)
             if rs.row_count == 0:
                 raise RowsetError(f"No row found for ID '{row_id}' in '{category}'")
@@ -134,13 +128,13 @@ class WriterService:
             rs.commit()
 
     def edit_rows(
-        self,
-        category: str,
-        fields: dict[str, str],
-        *,
-        filters: list[str] | None = None,
-        logic: str | None = None,
-        max_rows: int = 100,
+            self,
+            category: str,
+            fields: dict[str, str],
+            *,
+            filters: list[str] | None = None,
+            logic: str | None = None,
+            max_rows: int = 100,
     ) -> int:
         """Edit rows matching optional filters.
 
@@ -156,8 +150,6 @@ class WriterService:
             The number of rows edited.
         """
         with self._db.get_cursor(category) as cur:
-            cur.set_columns_all()
-
             if filters:
                 for f in filters:
                     cur.set_filter(f)
@@ -198,12 +190,12 @@ class WriterService:
             rs.commit()
 
     def delete_rows(
-        self,
-        category: str,
-        *,
-        filters: list[str] | None = None,
-        logic: str | None = None,
-        max_rows: int = 100,
+            self,
+            category: str,
+            *,
+            filters: list[str] | None = None,
+            logic: str | None = None,
+            max_rows: int = 100,
     ) -> int:
         """Delete rows matching optional filters.
 
@@ -238,12 +230,12 @@ class WriterService:
 
     # -- UPSERT --------------------------------------------------------------
     def upsert_rows(
-        self,
-        category: str,
-        pk_field: str,
-        rows: list[dict[str, str]],
-        *,
-        reader: 'ReaderService | None' = None,
+            self,
+            category: str,
+            pk_field: str,
+            rows: list[dict[str, str]],
+            *,
+            reader: 'ReaderService | None' = None,
     ) -> dict[str, int]:
         """Add-or-update rows based on primary-key match.
 

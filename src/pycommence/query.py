@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from functools import reduce
+from pathlib import Path
 from typing import Generator, TYPE_CHECKING
 
 from pycommence._com.constants import CMC_CURSOR_CATEGORY
+from pycommence.config import PycommenceSettings
 from pycommence.models import RelatedColumn, RowResult
 
 if TYPE_CHECKING:
@@ -28,11 +31,11 @@ class QueryBuilder:
     """
 
     def __init__(
-        self,
-        category: str,
-        reader: 'ReaderService',
-        *,
-        mode: int = CMC_CURSOR_CATEGORY,
+            self,
+            category: str,
+            reader: 'ReaderService',
+            *,
+            mode: int = CMC_CURSOR_CATEGORY,
     ) -> None:
         self._category = category
         self._reader = reader
@@ -68,11 +71,11 @@ class QueryBuilder:
 
     # -- filtering -----------------------------------------------------------
     def where(
-        self,
-        field: str,
-        qualifier: str,
-        value: str = '',
-        case_sensitive: bool = False,
+            self,
+            field: str,
+            qualifier: str,
+            value: str = '',
+            case_sensitive: bool = False,
     ) -> 'QueryBuilder':
         """Add a field filter clause (FilterType=F).
 
@@ -107,12 +110,12 @@ class QueryBuilder:
         return self
 
     def where_connection(
-        self,
-        connection_name: str,
-        connected_category: str,
-        item_name: str,
-        *,
-        not_flag: bool = False,
+            self,
+            connection_name: str,
+            connected_category: str,
+            item_name: str,
+            *,
+            not_flag: bool = False,
     ) -> 'QueryBuilder':
         """Add a 'Connection To Item' filter clause (CTI).
 
@@ -149,15 +152,15 @@ class QueryBuilder:
         return self
 
     def where_connected_field(
-        self,
-        connection_name: str,
-        connected_category: str,
-        field: str,
-        qualifier: str,
-        value: str = '',
-        case_sensitive: bool = False,
-        *,
-        not_flag: bool = False,
+            self,
+            connection_name: str,
+            connected_category: str,
+            field: str,
+            qualifier: str,
+            value: str = '',
+            case_sensitive: bool = False,
+            *,
+            not_flag: bool = False,
     ) -> 'QueryBuilder':
         """Add a 'Connection To Category Field' filter clause (CTCF).
 
@@ -222,10 +225,10 @@ class QueryBuilder:
         return self
 
     def related_column(
-        self,
-        connection: str,
-        category: str,
-        field: str,
+            self,
+            connection: str,
+            category: str,
+            field: str,
     ) -> 'QueryBuilder':
         """Include a connected/indirect field in the result set.
 
@@ -398,4 +401,16 @@ class QueryBuilder:
             filters=self._filters or None,
             logic=self._logic,
             mode=self._mode,
+        )
+
+    def apply_settings(self, toml_path: Path | None = None) -> 'QueryBuilder':
+        if toml_path is None:
+            toml_path = Path(__file__).parent.parent.parent / 'data' / 'config.toml'
+        settings = PycommenceSettings.from_toml(toml_path)
+
+        sorts = settings.sorts.get(self._category, [])
+        return reduce(
+            lambda qb, srt: qb.sort(field=srt.field, ascending=srt.ascending),
+            sorts,
+            self,
         )

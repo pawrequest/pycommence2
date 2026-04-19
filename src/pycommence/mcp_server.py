@@ -46,7 +46,6 @@ def _build_server(*, read_only: bool = False) -> Any:
 
     mcp_app = FastMCP(
         'pycommence',
-        description='MCP server for Commence database operations via pycommence.',
     )
 
     # The async session is lazily initialised on first tool call.

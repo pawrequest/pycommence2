@@ -110,7 +110,7 @@ async def _render_browser(category: str) -> None:
                     columns=cl,
                     filters=f if f else None,
                     max_rows=page_state['rows_per_page'],
-                    canonical=True,
+                    canonical=False,
                 )
             )
         except Exception as exc:
