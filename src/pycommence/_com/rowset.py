@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any, TYPE_CHECKING
 
 from pycommence._com.constants import CMC_FLAG_CANONICAL, CMC_FLAG_FIELD_NAME
 from pycommence._com.retry import com_retry
@@ -65,7 +65,7 @@ class RowsetWrapper:
             raise RowsetError(f"GetColumnIndex('{label}') returned -1 (not found)")
         return idx
 
-    def get_row(self, row: int, delim: str = '\t', canonical: bool = False) -> str:
+    def get_row(self, row: int, delim: str = '\t', canonical: bool = True) -> str:
         flags = CMC_FLAG_CANONICAL if canonical else 0
         val = self._rs.GetRow(row, delim, flags)
         if val is None:
