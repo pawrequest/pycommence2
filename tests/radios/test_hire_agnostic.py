@@ -161,7 +161,7 @@ class TestLargeDataReads:
     ) -> None:
         """Read 200 rows with all columns — a realistic page size that can
         blow up if total cell data exceeds COM buffer limits."""
-        print(f'\nBatch Size: 200')
+        print('\nBatch Size: 200')
         rows = session.read(CATEGORY, max_rows=200)
         assert len(rows) == 200
 
@@ -213,9 +213,7 @@ class TestSketchyNames:
     def all_names(self, session: CommenceSession, pk_field: str) -> list[str]:
         """Fetch every PK value in the category (once per class)."""
         rows = session.read(
-            CATEGORY,
-            columns=[pk_field],
-            max_rows=session.schema.get_row_count(CATEGORY),
+            CATEGORY, columns=[pk_field], max_rows=session.schema.get_row_count(CATEGORY)
         )
         return [r[pk_field] for r in rows]
 

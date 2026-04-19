@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import Generator, TYPE_CHECKING
 
 from pycommence._com.constants import BOOKMARK_BEGINNING, CMC_CURSOR_CATEGORY
 from pycommence.models import RelatedColumn, RowResult
@@ -41,7 +41,7 @@ class ReaderService:
         get_ids: bool = True,
         canonical: bool = False,
         mode: int = CMC_CURSOR_CATEGORY,
-    ) -> list[RowResult]:
+    ) -> Generator[RowResult, None, None]:
         """Read rows from a category with optional filtering and sorting.
 
         Results are paginated internally in batches of 200 rows to avoid
@@ -77,7 +77,8 @@ class ReaderService:
                 cur.set_columns(columns)
                 num_direct = len(columns)
             else:
-                cur.set_columns_all()
+                # cur.set_columns_all()
+                pass
                 # column count will be determined from the rowset
 
             # related (indirect) columns
@@ -110,10 +111,10 @@ class ReaderService:
 
             total = min(cur.row_count, max_rows)
             if total == 0:
-                return []
+                return  # no results
 
             cur.seek_row(BOOKMARK_BEGINNING, 0)
-            results: list[RowResult] = []
+            # results: list[RowResult] = []
             remaining = total
 
             while remaining > 0:
@@ -121,17 +122,24 @@ class ReaderService:
                 rs = cur.get_query_rowset(batch_size)
                 labels = rs.column_labels()
                 for r in range(rs.row_count):
-                    row_data = {
-                        labels[c]: rs.get_row_value(r, c, canonical=canonical)
-                        for c in range(rs.column_count)
-                    }
+                    delim = '/**/?'
+                    row = rs.get_row(r, delim, canonical=canonical)
+                    split = row.split(delim)
+                    if len(labels) != len(split):
+                        raise ValueError(
+                            f'Column count mismatch: expected {len(labels)} columns but got {len(split)} values in row {r}'
+                        )
+                    row_data = dict(zip(labels, split))
+                    # row_data = {
+                    #     labels[c]: rs.get_row_value(r, c, canonical=canonical)
+                    #     for c in range(rs.column_count)
+                    # }
                     row_id = rs.get_row_id(r) if get_ids else None
-                    results.append(RowResult(columns=row_data, row_id=row_id))
+                    yield RowResult(columns=row_data, row_id=row_id)
+                    # results.append(RowResult(columns=row_data, row_id=row_id))
                 remaining -= rs.row_count
                 if rs.row_count < batch_size:
                     break  # no more rows
-
-        return results
 
     def read_by_id(
         self,

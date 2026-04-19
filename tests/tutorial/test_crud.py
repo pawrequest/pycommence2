@@ -6,6 +6,7 @@ Tests are ordered: add → edit → delete within classes.
 
 from __future__ import annotations
 
+import time
 import uuid
 
 
@@ -294,3 +295,13 @@ class TestCrudCycle:
 
         # Verify tutorial data intact
         assert session.schema.get_row_count(CATEGORY) == len(CONTACT_ITEM_NAMES)
+
+
+class TestReadSpeeds:
+    def test_read_50(self, session: CommenceSession):
+        t0 = time.perf_counter()
+        res = session.read('Contact', max_rows=50)
+        # res = list(res)
+        t1 = time.perf_counter()
+        print(f'Read {len(res)} rows in {t1 - t0:.4f} seconds')
+        ...

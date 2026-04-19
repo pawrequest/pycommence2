@@ -34,8 +34,8 @@ Usage::
 from __future__ import annotations
 
 import logging
-
 from pathlib import Path
+from typing import Generator
 
 from pycommence._com.connection import CommenceDB
 from pycommence._com.constants import CMC_CURSOR_VIEW
@@ -269,9 +269,10 @@ class CommenceSession:
         filters: list[str] | None = None,
         logic: str | None = None,
         sort: str | None = None,
-        max_rows: int = 500,
+        max_rows: int = 200,
         canonical: bool = False,
-    ) -> list[RowResult]:
+        resolve: bool = True,
+    ) -> Generator[RowResult, None, None] | tuple[RowResult, ...]:
         """Read rows from a category with optional filtering/sorting.
 
         Args:
@@ -285,6 +286,8 @@ class CommenceSession:
             canonical: If ``True``, return dates as ``yyyymmdd``, numbers
                 without locale formatting, times as ``hh:mm``, and
                 checkboxes as ``TRUE``/``FALSE``.
+            resolve: If ``True``, return a tuple of results. If ``False``,
+                return the raw generator for streaming/iterative processing.
 
         Returns:
             A list of ``RowResult`` objects, each containing a ``columns``
@@ -296,7 +299,7 @@ class CommenceSession:
             for row in rows:
                 print(row["Name"], row["Email"])
         """
-        return self._reader.read_rows(
+        res = self._reader.read_rows(
             category,
             columns=columns,
             filters=filters,
@@ -305,6 +308,7 @@ class CommenceSession:
             max_rows=max_rows,
             canonical=canonical,
         )
+        return tuple(res) if resolve else res
 
     def read_by_id(
         self,

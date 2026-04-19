@@ -58,9 +58,7 @@ class TestKnownData:
 
     def test_gates_bill_exists(self, session: CommenceSession) -> None:
         rows = session.read(
-            CATEGORY,
-            columns=['contactKey', 'firstName', 'lastName', 'Title'],
-            max_rows=100,
+            CATEGORY, columns=['contactKey', 'firstName', 'lastName', 'Title'], max_rows=100
         )
         gates = [r for r in rows if r['contactKey'] == 'Gates.Bill']
         assert len(gates) == 1
@@ -69,20 +67,12 @@ class TestKnownData:
         assert gates[0]['Title'] == 'Founder of Microsoft'
 
     def test_gates_email(self, session: CommenceSession) -> None:
-        rows = session.read(
-            CATEGORY,
-            columns=['contactKey', 'emailBusiness'],
-            max_rows=100,
-        )
+        rows = session.read(CATEGORY, columns=['contactKey', 'emailBusiness'], max_rows=100)
         gates = [r for r in rows if r['contactKey'] == 'Gates.Bill']
         assert gates[0]['emailBusiness'] == 'bill.gates@gatesfoundation.com'
 
     def test_gates_bus_city(self, session: CommenceSession) -> None:
-        rows = session.read(
-            CATEGORY,
-            columns=['contactKey', 'busCity'],
-            max_rows=100,
-        )
+        rows = session.read(CATEGORY, columns=['contactKey', 'busCity'], max_rows=100)
         gates = [r for r in rows if r['contactKey'] == 'Gates.Bill']
         assert gates[0]['busCity'] == 'Los Angeles'
 

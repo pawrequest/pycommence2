@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Generator, TYPE_CHECKING
 
 from pycommence._com.constants import CMC_CURSOR_CATEGORY
 from pycommence.models import RelatedColumn, RowResult
@@ -337,7 +337,7 @@ class QueryBuilder:
         return self
 
     # -- execute -------------------------------------------------------------
-    def execute(self) -> list[RowResult]:
+    def execute(self, resolve: bool = True) -> Generator[RowResult, None, None] | tuple[RowResult]:
         """Run the query and return results.
 
         Assembles the accumulated columns, filters, sort, and options
@@ -367,7 +367,7 @@ class QueryBuilder:
             inner = ', '.join(f'{f}, {d}' for f, d in self._sort_pairs[:4])
             sort_str = f'[ViewSort({inner})]'
 
-        return self._reader.read_rows(
+        res = self._reader.read_rows(
             self._category,
             columns=self._columns,
             related_columns=self._related_columns or None,
@@ -379,6 +379,7 @@ class QueryBuilder:
             canonical=self._canonical,
             mode=self._mode,
         )
+        return tuple(res) if resolve else res
 
     def count(self) -> int:
         """Return only the count of matching rows (without fetching data).

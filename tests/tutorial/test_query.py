@@ -16,8 +16,8 @@ class TestQueryBuilderBasic:
         assert isinstance(qb, QueryBuilder)
 
     def test_execute_returns_rows(self, session: CommenceSession) -> None:
-        rows = session.query(CATEGORY).limit(5).execute()
-        assert isinstance(rows, list)
+        rows = session.query(CATEGORY).limit(5).execute(resolve=True)
+        assert isinstance(rows, tuple)
         assert len(rows) <= 5
         assert all(isinstance(r, RowResult) for r in rows)
 
