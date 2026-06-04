@@ -18,7 +18,7 @@ import logging
 
 import pytest
 
-from pycommence import (
+from pycommence2 import (
     CategoryInfo,
     CommenceSession,
     ConnectionInfo,

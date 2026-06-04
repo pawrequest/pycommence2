@@ -32,14 +32,15 @@ Commence COM objects are **STA-bound** (Single Threaded Apartment) — they must
 No extra dependencies — `AsyncCommenceSession` uses only the Python standard library (`asyncio`, `threading`, `queue`).
 
 ```bash
-pip install pycommence
+pip install pycommence2
 ```
 
 ## Quick Start
 
 ```python
 import asyncio
-from pycommence import AsyncCommenceSession
+from pycommence2 import AsyncCommenceSession
+
 
 async def main():
     async with AsyncCommenceSession() as db:
@@ -60,6 +61,7 @@ async def main():
             sort="Name",
             limit=20,
         )
+
 
 asyncio.run(main())
 ```
@@ -173,10 +175,11 @@ async with AsyncCommenceSession() as db:
 
 ```python
 from fastapi import FastAPI
-from pycommence import AsyncCommenceSession
+from pycommence2 import AsyncCommenceSession
 
 app = FastAPI()
 db: AsyncCommenceSession | None = None
+
 
 @app.on_event("startup")
 async def startup():
@@ -184,10 +187,12 @@ async def startup():
     db = AsyncCommenceSession()
     await db.__aenter__()
 
+
 @app.on_event("shutdown")
 async def shutdown():
     if db:
         await db.__aexit__(None, None, None)
+
 
 @app.get("/contacts")
 async def get_contacts(limit: int = 20):

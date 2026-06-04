@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from pycommence import CommenceSession, QueryBuilder, RowResult
+from pycommence2 import CommenceSession, QueryBuilder, RowResult
 from tests.sample_data import CONTACT_ITEM_NAMES
 
 CATEGORY = 'Contact'

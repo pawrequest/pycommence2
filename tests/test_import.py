@@ -13,7 +13,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from pycommence.services.import_svc import ImportService
+from pycommence2.services.import_svc import ImportService
 
 
 @pytest.fixture

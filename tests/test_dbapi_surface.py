@@ -9,7 +9,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 
-from pycommence.services.dde import DdeService
+from pycommence2.services.dde import DdeService
 
 
 # ---------------------------------------------------------------------------

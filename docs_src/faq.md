@@ -91,9 +91,9 @@ No. COM STA objects are single-threaded by design. Create one `CommenceSession` 
 The CLI is an optional extra:
 
 ```bash
-pip install pycommence[cli]
+pip install pycommence2[cli]
 # or
-uv add pycommence[cli]
+uv add pycommence2[cli]
 ```
 
 Then run `pycommence --help` to see available commands.
@@ -103,7 +103,7 @@ Then run `pycommence --help` to see available commands.
 The GUI requires its own optional dependencies:
 
 ```bash
-pip install pycommence[gui]
+pip install pycommence2[gui]
 ```
 
 If you see `ImportError: No module named 'nicegui'`, you haven't installed the `gui` extra.
@@ -113,7 +113,7 @@ If you see `ImportError: No module named 'nicegui'`, you haven't installed the `
 Excel export requires the `export` extra:
 
 ```bash
-pip install pycommence[export]
+pip install pycommence2[export]
 ```
 
 CSV and JSON exports work without extra dependencies.

@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 
-from pycommence.models import RowResult
+from pycommence2.models import RowResult
 
 
 # ---------------------------------------------------------------------------
@@ -17,7 +17,7 @@ class TestUpsertRows:
     """Unit tests for WriterService.upsert_rows."""
 
     def _make_writer(self):
-        from pycommence.services.writer import WriterService
+        from pycommence2.services.writer import WriterService
 
         db = MagicMock()
         writer = WriterService(db)
@@ -128,7 +128,7 @@ class TestCopyCategory:
     """Unit tests for migration.copy_category."""
 
     def test_copy_with_field_map(self):
-        from pycommence.services.migration import copy_category
+        from pycommence2.services.migration import copy_category
 
         reader = MagicMock()
         reader.read_rows.return_value = [
@@ -153,7 +153,7 @@ class TestCopyCategory:
         assert rows_written[1] == {'Name': 'Bob', 'Email': 'b@c.com'}
 
     def test_copy_no_field_map(self):
-        from pycommence.services.migration import copy_category
+        from pycommence2.services.migration import copy_category
 
         reader = MagicMock()
         reader.read_rows.return_value = [
@@ -169,7 +169,7 @@ class TestCopyCategory:
         assert rows_written[0] == {'Name': 'Alice', 'Email': 'a@b.com'}
 
     def test_copy_empty_source(self):
-        from pycommence.services.migration import copy_category
+        from pycommence2.services.migration import copy_category
 
         reader = MagicMock()
         reader.read_rows.return_value = []
@@ -190,9 +190,9 @@ class TestSessionUpsert:
     """Test session.upsert() delegates correctly."""
 
     def test_upsert_delegates(self):
-        from pycommence.session import CommenceSession
+        from pycommence2.session import CommenceSession
 
-        with patch('pycommence.session.CommenceDB') as MockDB:
+        with patch('pycommence2.session.CommenceDB') as MockDB:
             mock_db = MagicMock()
             MockDB.return_value = mock_db
 

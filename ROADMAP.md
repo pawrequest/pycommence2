@@ -74,9 +74,9 @@ New module: `src/pycommence/cache.py`
 
 ```python
 from platformdirs import user_cache_dir
-CACHE_DIR = Path(user_cache_dir("pycommence"))
+CACHE_DIR = Path(user_cache_dir("pycommence2"))
 # One JSON file per database, keyed by hash of (db_name, db_path):
-#   ~/.cache/pycommence/Radios_a3f7c1.json
+#   ~/.cache/pycommence2/Radios_a3f7c1.json
 ```
 
 Add `platformdirs` to dependencies (tiny, cross-platform, no transitive deps).

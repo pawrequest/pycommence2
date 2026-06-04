@@ -21,7 +21,7 @@ A clean, modern Python library for **Commence database** CRUD operations and sch
 ## Quick Example
 
 ```python
-from pycommence import CommenceSession
+from pycommence2 import CommenceSession
 
 with CommenceSession() as db:
     # Read 10 contacts

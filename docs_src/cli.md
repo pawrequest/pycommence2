@@ -7,9 +7,9 @@ pycommence includes a command-line interface powered by [click](https://click.pa
 The CLI requires the `cli` optional extra:
 
 ```bash
-pip install pycommence[cli]
+pip install pycommence2[cli]
 # or
-uv add pycommence[cli]
+uv add pycommence2[cli]
 ```
 
 ## Global Options
@@ -31,7 +31,7 @@ Options:
 Show database name, path, version, and shared status.
 
 ```bash
-pycommence info
+pycommence2 info
 ```
 
 Example output:
@@ -53,10 +53,10 @@ List all categories, or show fields and connections for a specific category.
 
 ```bash
 # List all categories with row counts
-pycommence schema
+pycommence2 schema
 
 # Show fields and connections for a category
-pycommence schema Contact
+pycommence2 schema Contact
 ```
 
 When given a category name, the output includes:
@@ -70,7 +70,7 @@ When given a category name, the output includes:
 Read rows from a category with optional filtering, column selection, and output formatting.
 
 ```bash
-pycommence read <CATEGORY> [OPTIONS]
+pycommence2 read <CATEGORY> [OPTIONS]
 ```
 
 | Option | Description |
@@ -85,19 +85,19 @@ pycommence read <CATEGORY> [OPTIONS]
 
 ```bash
 # Read 20 contacts as a rich table
-pycommence read Contact --limit 20
+pycommence2 read Contact --limit 20
 
 # Read specific columns as JSON
-pycommence read Contact -c "Name,Email,Phone" --format json
+pycommence2 read Contact -c "Name,Email,Phone" --format json
 
 # Filter by name, output as CSV
-pycommence read Contact -f "Name:Contains:Smith" --format csv
+pycommence2 read Contact -f "Name:Contains:Smith" --format csv
 
 # Multiple filters (AND logic)
-pycommence read Hire -f "Status:Equal To:Active" -f "City:Contains:London"
+pycommence2 read Hire -f "Status:Equal To:Active" -f "City:Contains:London"
 
 # Canonical mode for locale-independent data
-pycommence read Hire -c "Name,Booked Date,Price" --canonical --format json
+pycommence2 read Hire -c "Name,Booked Date,Price" --canonical --format json
 ```
 
 ### Filter Syntax
@@ -114,10 +114,10 @@ Count rows in a category, optionally filtered.
 
 ```bash
 # Total rows
-pycommence count Contact
+pycommence2 count Contact
 
 # Filtered count
-pycommence count Hire -f "Status:Equal To:Active"
+pycommence2 count Hire -f "Status:Equal To:Active"
 ```
 
 ### `export`
@@ -125,7 +125,7 @@ pycommence count Hire -f "Status:Equal To:Active"
 Export a category to a file (CSV, JSON, or Excel).
 
 ```bash
-pycommence export <CATEGORY> <OUTFILE> [OPTIONS]
+pycommence2 export <CATEGORY> <OUTFILE> [OPTIONS]
 ```
 
 | Option | Description |
@@ -140,16 +140,16 @@ pycommence export <CATEGORY> <OUTFILE> [OPTIONS]
 
 ```bash
 # CSV export (format auto-detected from .csv extension)
-pycommence export Contact contacts.csv
+pycommence2 export Contact contacts.csv
 
 # JSON with row limit
-pycommence export Hire hires.json --limit 1000
+pycommence2 export Hire hires.json --limit 1000
 
 # Excel with specific columns
-pycommence export Account data.xlsx --columns "Name,Email,Phone"
+pycommence2 export Account data.xlsx --columns "Name,Email,Phone"
 
 # With filter
-pycommence export Contact filtered.csv --filter "City:Equal To:Boston"
+pycommence2 export Contact filtered.csv --filter "City:Equal To:Boston"
 ```
 
 !!! note
@@ -160,7 +160,7 @@ pycommence export Contact filtered.csv --filter "City:Equal To:Boston"
 Backup categories to a directory with schema metadata.
 
 ```bash
-pycommence backup <OUTPUT_DIR> [OPTIONS]
+pycommence2 backup <OUTPUT_DIR> [OPTIONS]
 ```
 
 | Option | Description |
@@ -173,10 +173,10 @@ pycommence backup <OUTPUT_DIR> [OPTIONS]
 
 ```bash
 # Full database backup
-pycommence backup ./my_backup
+pycommence2 backup ./my_backup
 
 # Selective backup
-pycommence backup ./partial --categories "Contact,Hire"
+pycommence2 backup ./partial --categories "Contact,Hire"
 ```
 
 The backup directory contains:
@@ -190,7 +190,7 @@ The backup directory contains:
 Import rows from a file into a category.
 
 ```bash
-pycommence import <CATEGORY> <INFILE> [OPTIONS]
+pycommence2 import <CATEGORY> <INFILE> [OPTIONS]
 ```
 
 | Option | Description |
@@ -204,13 +204,13 @@ Supports CSV (`.csv`) and JSON (`.json`) files. CSV column headers must match Co
 
 ```bash
 # Import from CSV
-pycommence import Contact contacts.csv
+pycommence2 import Contact contacts.csv
 
 # Dry run — validate only, no writes
-pycommence import Hire hires.json --dry-run
+pycommence2 import Hire hires.json --dry-run
 
 # Import with row limit
-pycommence import Account data.csv --limit 100
+pycommence2 import Account data.csv --limit 100
 ```
 
 ### `gui`
@@ -218,7 +218,7 @@ pycommence import Account data.csv --limit 100
 Launch the NiceGUI desktop frontend.
 
 ```bash
-pycommence gui [OPTIONS]
+pycommence2 gui [OPTIONS]
 ```
 
 | Option | Description |
@@ -231,10 +231,10 @@ pycommence gui [OPTIONS]
 
 ```bash
 # Launch as desktop app
-pycommence gui
+pycommence2 gui
 
 # Launch as web app on port 8080
-pycommence gui --no-native --port 8080
+pycommence2 gui --no-native --port 8080
 ```
 
 !!! note

@@ -5,8 +5,8 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 
-from pycommence.models import RowResult, WatchEvent
-from pycommence.services.watch import PollWatcher
+from pycommence2.models import RowResult, WatchEvent
+from pycommence2.services.watch import PollWatcher
 
 
 # ---------------------------------------------------------------------------

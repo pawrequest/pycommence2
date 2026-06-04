@@ -5,7 +5,7 @@ pycommence includes a built-in [Model Context Protocol (MCP)](https://modelconte
 ## Installation
 
 ```bash
-pip install pycommence[mcp]
+pip install pycommence2[mcp]
 ```
 
 ## Quick Start
@@ -14,20 +14,20 @@ pip install pycommence[mcp]
 
 ```bash
 # Start MCP server over stdio (default)
-pycommence mcp
+pycommence2 mcp
 
 # Read-only mode (no add/edit/delete tools)
-pycommence mcp --read-only
+pycommence2 mcp --read-only
 
 # SSE transport for web-based clients
-pycommence mcp --transport sse --port 8000
+pycommence2 mcp --transport sse --port 8000
 ```
 
 ### Via standalone entry point
 
 ```bash
-pycommence-mcp
-pycommence-mcp --read-only
+pycommence2-mcp
+pycommence2-mcp --read-only
 ```
 
 ## Configuration for Claude Desktop
@@ -38,7 +38,7 @@ Add to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "commence": {
-      "command": "pycommence-mcp",
+      "command": "pycommence2-mcp",
       "args": []
     }
   }
@@ -51,7 +51,7 @@ For read-only access:
 {
   "mcpServers": {
     "commence": {
-      "command": "pycommence-mcp",
+      "command": "pycommence2-mcp",
       "args": ["--read-only"]
     }
   }
@@ -115,7 +115,7 @@ The async session is lazily initialised on the first tool call, so the server st
 You can also build and run the server programmatically:
 
 ```python
-from pycommence.mcp_server import _build_server
+from pycommence2.mcp_server import _build_server
 
 server = _build_server(read_only=True)
 server.run(transport="stdio")

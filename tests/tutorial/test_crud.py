@@ -10,7 +10,7 @@ import time
 import uuid
 
 
-from pycommence import CommenceSession
+from pycommence2 import CommenceSession
 from tests.sample_data import CONTACT_ITEM_NAMES
 
 CATEGORY = 'Contact'

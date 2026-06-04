@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from pycommence.models import RowResult
+from pycommence2.models import RowResult
 
 
 # ---------------------------------------------------------------------------
@@ -59,14 +59,14 @@ class TestMcpServerBuild:
 
     def test_build_server_read_write(self):
         pytest.importorskip('mcp')
-        from pycommence.mcp_server import _build_server
+        from pycommence2.mcp_server import _build_server
 
         server = _build_server(read_only=False)
         assert server is not None
 
     def test_build_server_read_only(self):
         pytest.importorskip('mcp')
-        from pycommence.mcp_server import _build_server
+        from pycommence2.mcp_server import _build_server
 
         server = _build_server(read_only=True)
         assert server is not None

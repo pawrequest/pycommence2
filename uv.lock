@@ -1559,7 +1559,7 @@ memory = [
 ]
 
 [[package]]
-name = "pycommence"
+name = "pycommence2"
 version = "0.5.0"
 source = { editable = "." }
 dependencies = [

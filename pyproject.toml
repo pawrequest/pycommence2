@@ -1,5 +1,5 @@
 [project]
-name = "pycommence"
+name = "pycommence2"
 version = "0.5.0"
 description = "Clean Python library for Commence database CRUD & schema introspection via COM automation."
 readme = "README.md"

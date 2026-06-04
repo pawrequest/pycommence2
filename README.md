@@ -46,7 +46,7 @@ A clean, modern Python library for **Commence database** CRUD operations and sch
 ## Quick Start
 
 ```python
-from pycommence import CommenceSession
+from pycommence2 import CommenceSession
 
 with CommenceSession() as db:
     print(f"Connected to: {db.db_name}")
@@ -219,7 +219,7 @@ with CommenceSession() as db:
 ## Installation
 
 ```bash
-uv add pycommence
+uv add pycommence2
 ```
 
 ## Documentation

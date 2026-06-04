@@ -5,13 +5,13 @@
 Install with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uv add pycommence
+uv add pycommence2
 ```
 
 Or with pip:
 
 ```bash
-pip install pycommence
+pip install pycommence2
 ```
 
 ### Optional Extras
@@ -20,19 +20,19 @@ pycommence has optional dependency groups for additional features:
 
 ```bash
 # Command-line interface (click + rich)
-pip install pycommence[cli]
+pip install pycommence2[cli]
 
 # NiceGUI desktop frontend
-pip install pycommence[gui]
+pip install pycommence2[gui]
 
 # Excel export support (openpyxl)
-pip install pycommence[export]
+pip install pycommence2[export]
 
 # MCP server for LLM agent access
-pip install pycommence[mcp]
+pip install pycommence2[mcp]
 
 # Install everything
-pip install pycommence[cli,gui,export,mcp]
+pip install pycommence2[cli,gui,export,mcp]
 ```
 
 ## Prerequisites
@@ -44,9 +44,9 @@ pip install pycommence[cli,gui,export,mcp]
 ## Hello World
 
 ```python
-from pycommence import CommenceSession, __version__
+from pycommence2 import CommenceSession, __version__
 
-print(f"pycommence {__version__}")
+print(f"pycommence2 {__version__}")
 
 with CommenceSession() as db:
     print(f"Connected to: {db.db_name}")
@@ -120,7 +120,8 @@ Use `AsyncCommenceSession` for async frameworks (FastAPI, NiceGUI, etc.):
 
 ```python
 import asyncio
-from pycommence import AsyncCommenceSession
+from pycommence2 import AsyncCommenceSession
+
 
 async def main():
     async with AsyncCommenceSession() as db:
@@ -130,6 +131,7 @@ async def main():
         rows = await db.read("Contact", columns=["Name", "Email"], max_rows=10)
         for row in rows:
             print(row["Name"], row["Email"])
+
 
 asyncio.run(main())
 ```

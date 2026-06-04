@@ -11,8 +11,8 @@ from pathlib import Path
 
 import pytest
 
-from pycommence.models import FieldInfo, FieldType, RowResult
-from pycommence.services.export import ExportService, detect_format
+from pycommence2.models import FieldInfo, FieldType, RowResult
+from pycommence2.services.export import ExportService, detect_format
 
 
 @pytest.fixture

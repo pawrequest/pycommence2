@@ -16,7 +16,7 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from pycommence.models import (
+from pycommence2.models import (
     ConnectionInfo,
     FieldInfo,
     FieldType,
@@ -24,7 +24,7 @@ from pycommence.models import (
 )
 
 # Import CLI after click/rich are guaranteed available
-from pycommence.cli import (
+from pycommence2.cli import (
     RENDERERS,
     _parse_filter,
     _render_csv,
@@ -154,7 +154,7 @@ class TestRenderers:
         # We can test indirectly by capturing what click.echo writes
         with runner.isolated_filesystem():
             buf = io.StringIO()
-            with patch('pycommence.cli.click.echo', side_effect=lambda x, **kw: buf.write(str(x))):
+            with patch('pycommence2.cli.click.echo', side_effect=lambda x, **kw: buf.write(str(x))):
                 _render_json(rows)
             data = json.loads(buf.getvalue())
             assert len(data) == 2
@@ -166,7 +166,7 @@ class TestRenderers:
             RowResult(columns={'Name': 'Bob', 'City': 'NYC'}),
         ]
         buf = io.StringIO()
-        with patch('pycommence.cli.click.echo', side_effect=lambda x, **kw: buf.write(str(x))):
+        with patch('pycommence2.cli.click.echo', side_effect=lambda x, **kw: buf.write(str(x))):
             _render_csv(rows)
         reader = csv.DictReader(io.StringIO(buf.getvalue()))
         parsed = list(reader)
@@ -176,7 +176,7 @@ class TestRenderers:
     def test_render_csv_empty(self) -> None:
         """CSV render with no rows should produce no output."""
         buf = io.StringIO()
-        with patch('pycommence.cli.click.echo', side_effect=lambda x, **kw: buf.write(str(x))):
+        with patch('pycommence2.cli.click.echo', side_effect=lambda x, **kw: buf.write(str(x))):
             _render_csv([])
         assert buf.getvalue() == ''
 
@@ -194,7 +194,7 @@ class TestCliGroup:
     def test_help(self, runner: CliRunner) -> None:
         result = runner.invoke(cli, ['--help'])
         assert result.exit_code == 0
-        assert 'pycommence' in result.output
+        assert 'pycommence2' in result.output
 
     def test_verbose_flag(self, runner: CliRunner) -> None:
         """--verbose should not error even without a subcommand."""
@@ -204,25 +204,25 @@ class TestCliGroup:
 
 class TestInfoCommand:
     def test_info(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['info'])
         assert result.exit_code == 0
         assert 'TestDB' in result.output
 
     def test_info_shows_path(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['info'])
         assert r'C:\Commence\TestDB' in result.output
 
     def test_info_shows_not_shared(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['info'])
         assert 'No' in result.output
 
     def test_info_session_error(self, runner: CliRunner) -> None:
         """When Commence isn't running, we get a ClickException."""
         with patch(
-            'pycommence.cli._get_session',
+            'pycommence2.cli._get_session',
             side_effect=click.ClickException('Cannot connect'),
         ):
             result = runner.invoke(cli, ['info'])
@@ -232,7 +232,7 @@ class TestInfoCommand:
 
 class TestSchemaCommand:
     def test_schema_list_categories(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['schema'])
         assert result.exit_code == 0
         assert 'Contact' in result.output
@@ -240,7 +240,7 @@ class TestSchemaCommand:
         assert 'Account' in result.output
 
     def test_schema_category_detail(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['schema', 'Contact'])
         assert result.exit_code == 0
         assert 'contactKey' in result.output
@@ -250,13 +250,13 @@ class TestSchemaCommand:
 
 class TestReadCommand:
     def test_read_basic(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['read', 'Contact'])
         assert result.exit_code == 0
         assert '2 row(s) returned' in result.output
 
     def test_read_json_format(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['read', 'Contact', '--format', 'json'])
         assert result.exit_code == 0
         data = json.loads(result.output.split('\n', 1)[1])  # skip the "N row(s)" line
@@ -264,19 +264,19 @@ class TestReadCommand:
         assert data[0]['Name'] == 'Alice'
 
     def test_read_csv_format(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['read', 'Contact', '--format', 'csv'])
         assert result.exit_code == 0
         assert 'Alice' in result.output
 
     def test_read_with_columns(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['read', 'Contact', '-c', 'Name,Email'])
         assert result.exit_code == 0
         mock_session.query.return_value.columns.assert_called_with('Name', 'Email')
 
     def test_read_with_filter(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(
                 cli,
                 [
@@ -294,19 +294,19 @@ class TestReadCommand:
         )
 
     def test_read_with_limit(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['read', 'Contact', '-l', '5'])
         assert result.exit_code == 0
         mock_session.query.return_value.limit.assert_called_with(5)
 
     def test_read_canonical(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['read', 'Contact', '--canonical'])
         assert result.exit_code == 0
         mock_session.query.return_value.canonical.assert_called()
 
     def test_read_multiple_filters(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(
                 cli,
                 [
@@ -328,14 +328,14 @@ class TestReadCommand:
 
 class TestCountCommand:
     def test_count_unfiltered(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['count', 'Contact'])
         assert result.exit_code == 0
         assert '25' in result.output
         mock_session.schema.get_row_count.assert_called_with('Contact')
 
     def test_count_filtered(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(
                 cli,
                 [
@@ -352,7 +352,7 @@ class TestCountCommand:
 
 class TestExportCommand:
     def test_export_csv(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['export', 'Contact', 'out.csv'])
         assert result.exit_code == 0
         assert 'Exported' in result.output
@@ -360,7 +360,7 @@ class TestExportCommand:
         mock_session.export.assert_called_once()
 
     def test_export_with_format(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(
                 cli,
                 [
@@ -380,7 +380,7 @@ class TestExportCommand:
         )
 
     def test_export_with_columns(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(
                 cli,
                 [
@@ -395,7 +395,7 @@ class TestExportCommand:
         mock_session.export.assert_called_once()
 
     def test_export_with_limit(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(
                 cli,
                 [
@@ -415,7 +415,7 @@ class TestExportCommand:
 
 class TestBackupCommand:
     def test_backup_all(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['backup', './my_backup'])
         assert result.exit_code == 0
         assert 'Backup complete' in result.output
@@ -423,7 +423,7 @@ class TestBackupCommand:
         assert '135' in result.output  # total_rows
 
     def test_backup_selected_categories(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(
                 cli,
                 [
@@ -437,7 +437,7 @@ class TestBackupCommand:
         mock_session.backup.assert_called_once()
 
     def test_backup_no_canonical(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(
                 cli,
                 [
@@ -453,7 +453,7 @@ class TestImportCommand:
     def test_import_csv(self, runner: CliRunner, mock_session: MagicMock, tmp_path: Path) -> None:
         csv_file = tmp_path / 'data.csv'
         csv_file.write_text('Name,Email\nAlice,a@b.com\n', encoding='utf-8')
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['import', 'Contact', str(csv_file)])
         assert result.exit_code == 0
         assert 'Imported' in result.output
@@ -462,7 +462,7 @@ class TestImportCommand:
     def test_import_json(self, runner: CliRunner, mock_session: MagicMock, tmp_path: Path) -> None:
         json_file = tmp_path / 'data.json'
         json_file.write_text('[{"Name": "Alice"}]', encoding='utf-8')
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['import', 'Contact', str(json_file)])
         assert result.exit_code == 0
         assert 'Imported' in result.output
@@ -478,7 +478,7 @@ class TestImportCommand:
         }
         csv_file = tmp_path / 'data.csv'
         csv_file.write_text('Name\nAlice\n', encoding='utf-8')
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['import', 'Contact', str(csv_file), '--dry-run'])
         assert result.exit_code == 0
         assert 'DRY RUN' in result.output
@@ -488,7 +488,7 @@ class TestImportCommand:
     ) -> None:
         csv_file = tmp_path / 'data.csv'
         csv_file.write_text('Name\nAlice\n', encoding='utf-8')
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(
                 cli,
                 [
@@ -506,7 +506,7 @@ class TestImportCommand:
     ) -> None:
         bad_file = tmp_path / 'data.parquet'
         bad_file.write_text('nope', encoding='utf-8')
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['import', 'Contact', str(bad_file)])
         assert result.exit_code != 0
         assert 'Unsupported import format' in result.output
@@ -521,7 +521,7 @@ class TestImportCommand:
         }
         csv_file = tmp_path / 'data.csv'
         csv_file.write_text('Name\nAlice\n', encoding='utf-8')
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             result = runner.invoke(cli, ['import', 'Contact', str(csv_file)])
         assert result.exit_code == 0
         assert 'Row 2: duplicate Name' in result.output
@@ -532,7 +532,7 @@ class TestGuiCommand:
         """If nicegui is not installed, the GUI command should give a clear error."""
         import sys
 
-        with patch.dict(sys.modules, {'pycommence.gui': None}):
+        with patch.dict(sys.modules, {'pycommence2.gui': None}):
             result = runner.invoke(cli, ['gui'])
         # Should report the missing extra, not traceback
         assert result.exit_code != 0
@@ -552,33 +552,33 @@ class TestGuiCommand:
 class TestEdgeCases:
     def test_session_close_called_on_info(self, runner: CliRunner, mock_session: MagicMock) -> None:
         """Verify session.close() is called even on success."""
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             runner.invoke(cli, ['info'])
         mock_session.close.assert_called_once()
 
     def test_session_close_called_on_read(self, runner: CliRunner, mock_session: MagicMock) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             runner.invoke(cli, ['read', 'Contact'])
         mock_session.close.assert_called_once()
 
     def test_session_close_called_on_count(
         self, runner: CliRunner, mock_session: MagicMock
     ) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             runner.invoke(cli, ['count', 'Contact'])
         mock_session.close.assert_called_once()
 
     def test_session_close_called_on_schema(
         self, runner: CliRunner, mock_session: MagicMock
     ) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             runner.invoke(cli, ['schema'])
         mock_session.close.assert_called_once()
 
     def test_session_close_called_on_export(
         self, runner: CliRunner, mock_session: MagicMock
     ) -> None:
-        with patch('pycommence.cli._get_session', return_value=mock_session):
+        with patch('pycommence2.cli._get_session', return_value=mock_session):
             runner.invoke(cli, ['export', 'Contact', 'out.csv'])
         mock_session.close.assert_called_once()
 

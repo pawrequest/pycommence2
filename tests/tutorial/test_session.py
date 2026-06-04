@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pycommence import CommenceSession
+from pycommence2 import CommenceSession
 
 
 class TestSessionConnection:

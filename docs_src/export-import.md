@@ -10,7 +10,7 @@ data in and out of Commence databases.
 The easiest way to export data is the `session.export()` convenience method:
 
 ```python
-from pycommence import CommenceSession
+from pycommence2 import CommenceSession
 
 with CommenceSession() as db:
     # Auto-detect format from extension
@@ -133,38 +133,38 @@ with CommenceSession() as db:
 
 ```bash
 # CSV export
-pycommence export Contact contacts.csv
+pycommence2 export Contact contacts.csv
 
 # JSON with row limit
-pycommence export Hire hires.json --limit 1000
+pycommence2 export Hire hires.json --limit 1000
 
 # Excel with specific columns
-pycommence export Account data.xlsx --columns "Name,Email,Phone"
+pycommence2 export Account data.xlsx --columns "Name,Email,Phone"
 
 # With filter
-pycommence export Contact filtered.csv --filter "City:Equal To:Boston"
+pycommence2 export Contact filtered.csv --filter "City:Equal To:Boston"
 ```
 
 ### Backup
 
 ```bash
 # Full database backup
-pycommence backup ./my_backup
+pycommence2 backup ./my_backup
 
 # Selective backup
-pycommence backup ./partial --categories "Contact,Hire"
+pycommence2 backup ./partial --categories "Contact,Hire"
 ```
 
 ### Import
 
 ```bash
 # Import from CSV
-pycommence import Contact contacts.csv
+pycommence2 import Contact contacts.csv
 
 # Dry run (validate only)
-pycommence import Hire hires.json --dry-run
+pycommence2 import Hire hires.json --dry-run
 
 # Import with row limit
-pycommence import Account data.csv --limit 100
+pycommence2 import Account data.csv --limit 100
 ```
 

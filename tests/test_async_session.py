@@ -9,7 +9,7 @@ import pytest
 # ---------------------------------------------------------------------------
 # ThreadDispatcher tests
 # ---------------------------------------------------------------------------
-from pycommence._thread_dispatch import ThreadDispatcher
+from pycommence2._thread_dispatch import ThreadDispatcher
 
 
 class TestThreadDispatcherLifecycle:
@@ -24,7 +24,7 @@ class TestThreadDispatcherLifecycle:
     def test_start_and_connected(self):
         d = ThreadDispatcher()
         with (
-            patch('pycommence.session.CommenceSession') as MockSession,
+            patch('pycommence2.session.CommenceSession') as MockSession,
         ):
             mock_session = MagicMock()
             mock_session.db_name = 'TestDB'
@@ -33,7 +33,7 @@ class TestThreadDispatcherLifecycle:
 
             # Patch at the import location inside _worker_loop
             with patch(
-                'pycommence.session.CommenceSession',
+                'pycommence2.session.CommenceSession',
                 MockSession,
             ):
                 d.start()
@@ -44,7 +44,7 @@ class TestThreadDispatcherLifecycle:
     def test_start_records_error_on_failure(self):
         d = ThreadDispatcher()
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             side_effect=RuntimeError('No Commence'),
         ):
             d.start()
@@ -61,7 +61,7 @@ class TestThreadDispatcherLifecycle:
         mock_session.db_name = 'TestDB'
         mock_session.db_path = 'C:\\test'
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             d.start()
@@ -84,7 +84,7 @@ class TestThreadDispatcherSubmit:
     def test_submit_returns_future(self):
         d, mock_session = self._make_dispatcher()
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             d.start()
@@ -97,7 +97,7 @@ class TestThreadDispatcherSubmit:
     def test_submit_propagates_exception(self):
         d, mock_session = self._make_dispatcher()
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             d.start()
@@ -124,7 +124,7 @@ class TestThreadDispatcherRun:
         mock_session.db_name = 'TestDB'
         mock_session.db_path = 'C:\\test'
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             d.start()
@@ -141,7 +141,7 @@ class TestThreadDispatcherRun:
         mock_session.db_name = 'TestDB'
         mock_session.db_path = 'C:\\test'
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             d.start()
@@ -158,7 +158,7 @@ class TestThreadDispatcherRun:
         mock_session.db_name = 'TestDB'
         mock_session.db_path = 'C:\\test'
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             d.start()
@@ -178,7 +178,7 @@ class TestThreadDispatcherRun:
 # ---------------------------------------------------------------------------
 # AsyncCommenceSession tests
 # ---------------------------------------------------------------------------
-from pycommence.async_session import AsyncCommenceSession
+from pycommence2.async_session import AsyncCommenceSession
 
 
 class TestAsyncSessionLifecycle:
@@ -187,7 +187,7 @@ class TestAsyncSessionLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
         ) as MockSession:
             mock_session = MagicMock()
             mock_session.db_name = 'TestDB'
@@ -200,7 +200,7 @@ class TestAsyncSessionLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager_raises_on_failure(self):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             side_effect=RuntimeError('No Commence'),
         ):
             with pytest.raises(RuntimeError, match='No Commence'):
@@ -228,7 +228,7 @@ class TestAsyncSessionMetadata:
     @pytest.mark.asyncio
     async def test_db_name(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -237,7 +237,7 @@ class TestAsyncSessionMetadata:
     @pytest.mark.asyncio
     async def test_db_path(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -246,7 +246,7 @@ class TestAsyncSessionMetadata:
     @pytest.mark.asyncio
     async def test_db_version(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -255,7 +255,7 @@ class TestAsyncSessionMetadata:
     @pytest.mark.asyncio
     async def test_db_shared(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -279,7 +279,7 @@ class TestAsyncSessionSchema:
     @pytest.mark.asyncio
     async def test_list_categories(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -289,7 +289,7 @@ class TestAsyncSessionSchema:
     @pytest.mark.asyncio
     async def test_get_row_count(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -302,7 +302,7 @@ class TestAsyncSessionRead:
 
     @pytest.fixture
     def mock_session(self):
-        from pycommence.models import RowResult
+        from pycommence2.models import RowResult
 
         s = MagicMock()
         s.db_name = 'TestDB'
@@ -320,7 +320,7 @@ class TestAsyncSessionRead:
     @pytest.mark.asyncio
     async def test_read(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -331,7 +331,7 @@ class TestAsyncSessionRead:
     @pytest.mark.asyncio
     async def test_read_by_id(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -347,7 +347,7 @@ class TestAsyncSessionRead:
         mock_qb.sort.return_value = mock_qb
         mock_qb.limit.return_value = mock_qb
         mock_qb.canonical.return_value = mock_qb
-        from pycommence.models import RowResult
+        from pycommence2.models import RowResult
 
         mock_qb.execute.return_value = [
             RowResult(columns={'Name': 'Smith'}, row_id='r1'),
@@ -355,7 +355,7 @@ class TestAsyncSessionRead:
         mock_session.query.return_value = mock_qb
 
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -378,7 +378,7 @@ class TestAsyncSessionRead:
         mock_session.query.return_value = mock_qb
 
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -401,7 +401,7 @@ class TestAsyncSessionCRUD:
     @pytest.mark.asyncio
     async def test_add(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -411,7 +411,7 @@ class TestAsyncSessionCRUD:
     @pytest.mark.asyncio
     async def test_add_many(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -428,7 +428,7 @@ class TestAsyncSessionCRUD:
     @pytest.mark.asyncio
     async def test_edit(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -438,7 +438,7 @@ class TestAsyncSessionCRUD:
     @pytest.mark.asyncio
     async def test_delete(self, mock_session):
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -455,7 +455,7 @@ class TestAsyncSessionConnections:
         mock_session.db_name = 'TestDB'
         mock_session.db_path = 'C:\\test'
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -480,7 +480,7 @@ class TestAsyncSessionConnections:
         mock_session.db_name = 'TestDB'
         mock_session.db_path = 'C:\\test'
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -504,7 +504,7 @@ class TestAsyncSessionExport:
         mock_session.db_path = 'C:\\test'
         mock_session.export.return_value = 100
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -518,7 +518,7 @@ class TestAsyncSessionExport:
         mock_session.db_path = 'C:\\test'
         mock_session.backup.return_value = {'total_rows': 500}
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -536,7 +536,7 @@ class TestAsyncSessionDde:
         mock_session.db_path = 'C:\\test'
         mock_session.dde.get_field.return_value = 'jane@example.com'
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -549,7 +549,7 @@ class TestAsyncSessionDde:
         mock_session.db_name = 'TestDB'
         mock_session.db_path = 'C:\\test'
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:
@@ -567,7 +567,7 @@ class TestAsyncSessionRun:
         mock_session.db_path = 'C:\\test'
         mock_session.schema.get_fields.return_value = ['field1', 'field2']
         with patch(
-            'pycommence.session.CommenceSession',
+            'pycommence2.session.CommenceSession',
             return_value=mock_session,
         ):
             async with AsyncCommenceSession() as db:

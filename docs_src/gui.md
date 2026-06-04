@@ -8,16 +8,16 @@ Commence database data.
 
 ```bash
 # Install with GUI dependencies
-pip install pycommence[gui]
+pip install pycommence2[gui]
 
 # Launch (Commence must be running)
-pycommence gui
+pycommence2 gui
 ```
 
 This opens a native desktop window. To run as a web app instead:
 
 ```bash
-pycommence gui --no-native --port 8080
+pycommence2 gui --no-native --port 8080
 ```
 
 ## Pages

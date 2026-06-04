@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pycommence import CommenceSession, RowResult
+from pycommence2 import CommenceSession, RowResult
 from tests.sample_data import CONTACT_FIELD_NAMES, CONTACT_ITEM_NAMES
 
 CATEGORY = 'Contact'

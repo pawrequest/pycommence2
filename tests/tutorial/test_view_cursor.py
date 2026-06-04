@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from pycommence import CommenceSession, RowResult
+from pycommence2 import CommenceSession, RowResult
 
 
 class TestQueryView:

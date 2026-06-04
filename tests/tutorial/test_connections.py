@@ -8,7 +8,7 @@ from __future__ import annotations
 import uuid
 
 
-from pycommence import CommenceSession
+from pycommence2 import CommenceSession
 
 
 CONTACT_CAT = 'Contact'

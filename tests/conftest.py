@@ -1,4 +1,4 @@
-"""Shared pytest fixtures for pycommence integration tests.
+"""Shared pytest fixtures for pycommence2 integration tests.
 
 These tests run against the LIVE Commence Tutorial database.
 Commence must be open in Tutorial mode before running.
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from pycommence import CommenceSession
+from pycommence2 import CommenceSession
 
 
 @pytest.fixture(scope='session')
@@ -32,7 +32,7 @@ async def async_session():
     Uses function scope so each async test gets a fresh session.
     Requires pytest-asyncio.
     """
-    from pycommence import AsyncCommenceSession
+    from pycommence2 import AsyncCommenceSession
 
     async with AsyncCommenceSession() as db:
         yield db

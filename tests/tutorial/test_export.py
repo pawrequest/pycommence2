@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 
 
-from pycommence import CommenceSession
+from pycommence2 import CommenceSession
 
 
 CATEGORY = 'Contact'

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from pycommence import CommenceSession
+from pycommence2 import CommenceSession
 from tests.sample_data import CONTACT_ITEM_NAMES
 
 CATEGORY = 'Contact'
