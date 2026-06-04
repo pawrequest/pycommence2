@@ -49,6 +49,7 @@ class QueryBuilder:
         self._max_rows: int = 500
         self._get_ids: bool = True
         self._canonical: bool = False
+        self._offset: int = 0
 
     # -- column selection ----------------------------------------------------
     def columns(self, *fields: str) -> 'QueryBuilder':
@@ -339,8 +340,23 @@ class QueryBuilder:
         self._canonical = val
         return self
 
+    def offset(self, n: int) -> 'QueryBuilder':
+        """Set the number of rows to skip from the start (for pagination).
+
+        Defaults to 0 if not called.
+
+        Args:
+            n: Number of rows to skip.
+
+        Returns:
+            This ``QueryBuilder`` (for chaining).
+        """
+        self._offset = n
+        return self
+
     # -- execute -------------------------------------------------------------
-    def execute(self, resolve: bool = True) -> Generator[RowResult, None, None] | tuple[RowResult]:
+    def execute(self, resolve: bool = True, apply_settings: bool = False, offset=0) \
+            -> Generator[RowResult, None, None] | tuple[RowResult]:
         """Run the query and return results.
 
         Assembles the accumulated columns, filters, sort, and options
@@ -365,6 +381,8 @@ class QueryBuilder:
             )
         """
         # Build the [ViewSort(...)] string from accumulated sort pairs
+        if apply_settings:
+            self.apply_settings()
         sort_str: str | None = None
         if self._sort_pairs:
             inner = ', '.join(f'{f}, {d}' for f, d in self._sort_pairs[:4])
@@ -381,6 +399,7 @@ class QueryBuilder:
             get_ids=self._get_ids,
             canonical=self._canonical,
             mode=self._mode,
+            offset=offset,
         )
         return tuple(res) if resolve else res
 

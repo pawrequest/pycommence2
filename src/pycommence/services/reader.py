@@ -41,6 +41,7 @@ class ReaderService:
             get_ids: bool = True,
             canonical: bool = False,
             mode: int = CMC_CURSOR_CATEGORY,
+            offset=0,
     ) -> Generator[RowResult, None, None]:
         """Read rows from a category with optional filtering and sorting.
 
@@ -63,6 +64,7 @@ class ReaderService:
                 checkboxes as ``TRUE``/``FALSE``.
             mode: Cursor mode — ``CMC_CURSOR_CATEGORY`` (default) or
                 ``CMC_CURSOR_VIEW``.
+            offset: Number of rows to skip from the start (for pagination).
 
         Returns:
             A list of ``RowResult`` objects.
@@ -109,7 +111,7 @@ class ReaderService:
             if total == 0:
                 return  # no results
 
-            cur.seek_row(BOOKMARK_BEGINNING, 0)
+            cur.seek_row(BOOKMARK_BEGINNING, offset)
             # results: list[RowResult] = []
             remaining = total
 
