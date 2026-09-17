@@ -17,9 +17,7 @@ class PycommenceSettings(BaseSettings):
 
     @classmethod
     def default(cls):
-        toml_path = Path(platformdirs.user_config_path('pcommence2', 'pawrequest')).resolve() / 'config.toml'
-        toml_path.touch(exist_ok=True)
-        return cls.from_toml(toml_path)
+        return cls()
 
     @classmethod
     def from_toml(cls, path: Path) -> 'PycommenceSettings':
@@ -27,4 +25,4 @@ class PycommenceSettings(BaseSettings):
 
         with open(path, 'rb') as f:
             data = tomllib.load(f)
-        return cls(**data)
+        return cls(**data) if data else cls()
