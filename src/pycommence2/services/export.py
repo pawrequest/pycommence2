@@ -158,9 +158,7 @@ class ExportService:
         try:
             from openpyxl import Workbook
         except ImportError:
-            raise ImportError(
-                "Excel export requires 'openpyxl'.  Install with:\n  pip install openpyxl"
-            )
+            raise ImportError("Excel export requires 'openpyxl'.  Install with:\n  pip install openpyxl")
 
         if not rows:
             log.warning('to_excel: no rows to export')
@@ -209,8 +207,5 @@ def detect_format(path: str | Path) -> str:
     }
     fmt = mapping.get(suffix)
     if fmt is None:
-        raise ValueError(
-            f"Cannot detect format from extension '{suffix}'. "
-            f'Supported: {", ".join(mapping.keys())}'
-        )
+        raise ValueError(f"Cannot detect format from extension '{suffix}'. Supported: {', '.join(mapping.keys())}")
     return fmt

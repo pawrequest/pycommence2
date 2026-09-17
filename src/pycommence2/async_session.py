@@ -43,7 +43,7 @@ class AsyncCommenceSession:
 
     # -- async context manager -----------------------------------------------
 
-    async def __aenter__(self) -> 'AsyncCommenceSession':
+    async def __aenter__(self) -> AsyncCommenceSession:
         self._dispatcher.start()
         if self._dispatcher.startup_error:
             raise self._dispatcher.startup_error

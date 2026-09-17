@@ -129,7 +129,7 @@ class RowsetWrapper:
             raise RowsetError(f'DeleteRow({row}) failed')
 
     # -- commit-get-cursor (Add rowsets) ------------------------------------
-    def commit_get_cursor(self) -> 'CursorWrapper | None':
+    def commit_get_cursor(self) -> CursorWrapper | None:
         """Commit the rowset and return a cursor over the newly added rows.
 
         Returns ``None`` if the underlying COM call fails or is unsupported.

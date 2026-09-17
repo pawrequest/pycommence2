@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -32,7 +32,7 @@ class BackupService:
             print(f"Backed up {stats['categories_exported']} categories")
     """
 
-    def __init__(self, session: 'CommenceSession') -> None:
+    def __init__(self, session: CommenceSession) -> None:
         self._session = session
 
     def backup(
@@ -73,7 +73,7 @@ class BackupService:
         session = self._session
         all_cats = categories or session.schema.list_categories()
 
-        timestamp = datetime.now(tz=timezone.utc).isoformat()
+        timestamp = datetime.now(tz=UTC).isoformat()
         total_rows = 0
         files: list[str] = []
         schema_data: dict[str, object] = {

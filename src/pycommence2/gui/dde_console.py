@@ -24,8 +24,7 @@ def _render_dde_console() -> None:
     """Render the DDE console UI."""
     ui.label('DDE Console').classes('text-xl font-bold')
     ui.label(
-        'Send raw DDE Request or Execute commands to the Commence database. '
-        'Power-user tool — use with care.'
+        'Send raw DDE Request or Execute commands to the Commence database. Power-user tool — use with care.'
     ).classes('text-sm text-grey')
 
     # -- Command input -------------------------------------------------------
@@ -69,9 +68,7 @@ def _render_dde_console() -> None:
             notify_error('Enter a DDE command.')
             return
         try:
-            result = await state.worker.run(
-                lambda s, c=cmd: s._schema._conv.request(c)  # noqa: SLF001
-            )
+            result = await state.worker.run(lambda s, c=cmd: s._schema._conv.request(c))
             response_area.set_content(result)
         except Exception as exc:
             response_area.set_content(f'ERROR: {exc}')
@@ -82,9 +79,7 @@ def _render_dde_console() -> None:
             notify_error('Enter a DDE command.')
             return
         try:
-            await state.worker.run(
-                lambda s, c=cmd: s._schema._conv.execute(c)  # noqa: SLF001
-            )
+            await state.worker.run(lambda s, c=cmd: s._schema._conv.execute(c))
             response_area.set_content('OK (no return value for Execute commands)')
         except Exception as exc:
             response_area.set_content(f'ERROR: {exc}')

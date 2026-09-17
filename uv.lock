@@ -1564,6 +1564,7 @@ version = "0.5.0"
 source = { editable = "." }
 dependencies = [
     { name = "platformdirs" },
+    { name = "pydantic-settings" },
     { name = "pywin32" },
 ]
 
@@ -1603,6 +1604,7 @@ requires-dist = [
     { name = "nicegui", marker = "extra == 'gui'", specifier = ">=2.0" },
     { name = "openpyxl", marker = "extra == 'export'", specifier = ">=3.1" },
     { name = "platformdirs", specifier = ">=4.0" },
+    { name = "pydantic-settings", specifier = ">=2.13.1" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=1.0" },
     { name = "pywebview", marker = "extra == 'gui'", specifier = ">=5.0" },

@@ -5,7 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date, time
 from enum import IntEnum
-from typing import Any, Iterator
+from typing import Any
+from collections.abc import Iterator
 
 
 # ---------------------------------------------------------------------------
@@ -35,7 +36,7 @@ class FieldType(IntEnum):
     URL = 24
 
     @classmethod
-    def from_code(cls, code: int) -> 'FieldType':
+    def from_code(cls, code: int) -> FieldType:
         """Convert a raw integer code to a ``FieldType``.
 
         Falls back to ``TEXT`` for unrecognised codes.
@@ -192,7 +193,7 @@ class RowResult:
         """
         return dict(self.columns)
 
-    def to_typed_dict(self, fields: list['FieldInfo']) -> dict[str, Any]:
+    def to_typed_dict(self, fields: list[FieldInfo]) -> dict[str, Any]:
         """Coerce string values to Python types based on field metadata.
 
         Requires **canonical mode** data for reliable parsing of dates,
@@ -227,7 +228,7 @@ class RowResult:
         return result
 
 
-def _coerce_value(raw: str, ft: 'FieldType') -> Any:
+def _coerce_value(raw: str, ft: FieldType) -> Any:
     """Convert a raw string value to a Python type based on field type."""
     if not raw:
         # Empty string → None for non-text types, "" for text
@@ -295,7 +296,7 @@ class WatchEvent:
     """
 
     event_type: str  # "added", "changed", "removed"
-    row: 'RowResult' = field(default_factory=lambda: RowResult())
+    row: RowResult = field(default_factory=lambda: RowResult())
 
 
 # ---------------------------------------------------------------------------

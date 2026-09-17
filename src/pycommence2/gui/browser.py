@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 from nicegui import ui
 
@@ -17,14 +17,10 @@ _BATCH_SIZE = 50
 # Query helper
 # ---------------------------------------------------------------------------
 
+
 def make_and_execute_q(session, category, columns, filter_builder_, batch_size, offset=0):
     """Run on the COM thread: fetch *batch_size* rows starting at *offset*."""
-    qb: QueryBuilder = (
-        session.query(category)
-        .columns(*columns)
-        .limit(batch_size)
-        .with_ids(True)
-    ).apply_settings()
+    qb: QueryBuilder = (session.query(category).columns(*columns).limit(batch_size).with_ids(True)).apply_settings()
     filter_builder_.apply_to(qb)
     rows = []
     for r in qb.execute(resolve=False, offset=offset):
@@ -37,6 +33,7 @@ def make_and_execute_q(session, category, columns, filter_builder_, batch_size, 
 # ---------------------------------------------------------------------------
 # Public reusable component
 # ---------------------------------------------------------------------------
+
 
 async def build_category_table(
     category: str,
@@ -60,12 +57,8 @@ async def build_category_table(
     assert worker is not None
 
     try:
-        field_names: list[str] = await worker.run(
-            lambda s, c=category: s.schema.get_field_names(c)
-        )
-        total_rows: int = await worker.run(
-            lambda s, c=category: s.schema.get_row_count(c)
-        )
+        field_names: list[str] = await worker.run(lambda s, c=category: s.schema.get_field_names(c))
+        total_rows: int = await worker.run(lambda s, c=category: s.schema.get_row_count(c))
     except Exception as exc:
         notify_error(f"Failed to load schema for '{category}': {exc}")
         return
@@ -88,9 +81,9 @@ async def build_category_table(
         ui.label(f'{total_rows:,} total rows').classes('text-sm text-grey self-center')
 
     with ui.row().classes('items-center gap-2 flex-wrap'):
-        ui.button('Load / Refresh', icon='refresh',
-                  on_click=lambda: ui.timer(0, refresh_data, once=True)
-                  ).props('color=primary dense')
+        ui.button('Load / Refresh', icon='refresh', on_click=lambda: ui.timer(0, refresh_data, once=True)).props(
+            'color=primary dense'
+        )
 
     # -- Results table -------------------------------------------------------
     table_container = ui.column().classes('w-full')
@@ -107,10 +100,7 @@ async def build_category_table(
     }
 
     def _col_defs(cols: list[str]) -> list[dict]:
-        return [
-            {'name': c, 'label': c, 'field': c, 'align': 'left', 'sortable': True}
-            for c in cols
-        ]
+        return [{'name': c, 'label': c, 'field': c, 'align': 'left', 'sortable': True} for c in cols]
 
     async def _fetch_and_append(cols: list[str]) -> None:
         """Fetch the next batch at the current offset and append to the table."""
@@ -119,8 +109,12 @@ async def build_category_table(
         load_state['fetching'] = True
         try:
             batch: list[dict] = await worker.run(
-                make_and_execute_q, category, cols, filter_builder,
-                batch_size, load_state['offset'],
+                make_and_execute_q,
+                category,
+                cols,
+                filter_builder,
+                batch_size,
+                load_state['offset'],
             )
         except Exception as exc:
             notify_error(f'Fetch error: {exc}')
@@ -131,9 +125,7 @@ async def build_category_table(
         if not batch:
             load_state['exhausted'] = True
             if load_state['status_label']:
-                load_state['status_label'].set_text(
-                    f'{load_state["offset"]:,} rows — all loaded'
-                )
+                load_state['status_label'].set_text(f'{load_state["offset"]:,} rows — all loaded')
             if load_state['load_more_btn']:
                 load_state['load_more_btn'].set_visibility(False)
             return
@@ -145,8 +137,7 @@ async def build_category_table(
         load_state['offset'] += len(batch)
         if load_state['status_label']:
             load_state['status_label'].set_text(
-                f'{load_state["offset"]:,} rows loaded'
-                + ('' if load_state['offset'] < total_rows else ' — all loaded')
+                f'{load_state["offset"]:,} rows loaded' + ('' if load_state['offset'] < total_rows else ' — all loaded')
             )
         if len(batch) < batch_size:
             load_state['exhausted'] = True
@@ -156,15 +147,26 @@ async def build_category_table(
     async def refresh_data() -> None:
         """Reset and load the first batch."""
         table_container.clear()
-        load_state.update(tbl=None, loaded_cols=set(), offset=0,
-                          exhausted=False, fetching=False, status_label=None,
-                          load_more_btn=None)
+        load_state.update(
+            tbl=None,
+            loaded_cols=set(),
+            offset=0,
+            exhausted=False,
+            fetching=False,
+            status_label=None,
+            load_more_btn=None,
+        )
         cols = list(col_select.value or selected_cols)
 
         # First batch
         try:
             first_batch: list[dict] = await worker.run(
-                make_and_execute_q, category, cols, filter_builder, batch_size, 0,
+                make_and_execute_q,
+                category,
+                cols,
+                filter_builder,
+                batch_size,
+                0,
             )
         except Exception as exc:
             with table_container:
@@ -205,15 +207,18 @@ async def build_category_table(
             # Sentinel div — IntersectionObserver fires load_more when it scrolls into view
             sentinel = ui.element('div').style('height:1px')
             load_more_btn = (
-                ui.button('Load more', icon='expand_more',
-                          on_click=lambda: ui.timer(0, lambda: _fetch_and_append(cols), once=True))
+                ui.button(
+                    'Load more',
+                    icon='expand_more',
+                    on_click=lambda: ui.timer(0, lambda: _fetch_and_append(cols), once=True),
+                )
                 .props('flat dense')
                 .classes('w-full')
             )
             load_state['load_more_btn'] = load_more_btn
 
             # Wire IntersectionObserver to the sentinel inside the virtual-scroll container
-            await ui.run_javascript(f'''
+            await ui.run_javascript(f"""
                 (function() {{
                     const sentinel = document.getElementById('{sentinel.id}');
                     if (!sentinel) return;
@@ -224,7 +229,7 @@ async def build_category_table(
                     }}, {{ threshold: 0.1 }});
                     observer.observe(sentinel);
                 }})();
-            ''')
+            """)
 
             async def _on_sentinel_visible(_e) -> None:
                 await _fetch_and_append(cols)
@@ -249,6 +254,7 @@ async def build_category_table(
 # Filter builder — inline, decoupled from raw DDE strings
 # ---------------------------------------------------------------------------
 
+
 class FilterBuilder:
     """Inline filter clause builder (up to 4 clauses).
 
@@ -259,9 +265,17 @@ class FilterBuilder:
     """
 
     _QUALIFIERS = [
-        'Equal To', 'Not Equal To', 'Contains', 'Not Contains',
-        'After', 'Before', 'Between', 'Blank', 'Not Blank',
-        'Checked', 'Not Checked',
+        'Equal To',
+        'Not Equal To',
+        'Contains',
+        'Not Contains',
+        'After',
+        'Before',
+        'Between',
+        'Blank',
+        'Not Blank',
+        'Checked',
+        'Not Checked',
     ]
 
     def __init__(self, field_names: list[str]) -> None:
@@ -269,12 +283,8 @@ class FilterBuilder:
         self._clauses: list[tuple[str, str, str]] = []  # (field, qualifier, value)
 
         with ui.row().classes('gap-2 items-end flex-wrap'):
-            self._field_input = ui.select(
-                field_names, label='Filter field', with_input=True
-            ).classes('w-48')
-            self._qual_input = ui.select(
-                self._QUALIFIERS, label='Qualifier'
-            ).classes('w-40')
+            self._field_input = ui.select(field_names, label='Filter field', with_input=True).classes('w-48')
+            self._qual_input = ui.select(self._QUALIFIERS, label='Qualifier').classes('w-40')
             self._value_input = ui.input(label='Value').classes('w-40')
             ui.button('Add filter', icon='add', on_click=self._add_clause).props('dense outline')
 
@@ -317,6 +327,7 @@ class FilterBuilder:
 # Page registration
 # ---------------------------------------------------------------------------
 
+
 def register() -> None:
     """Register the browser page routes."""
 
@@ -335,9 +346,7 @@ def register() -> None:
 
             ui.label('Select a category to browse:').classes('text-lg')
             select = ui.select(categories, label='Category', with_input=True).classes('w-64')
-            select.on_value_change(
-                lambda e: ui.navigate.to(f'/browse/{e.value}') if e.value else None
-            )
+            select.on_value_change(lambda e: ui.navigate.to(f'/browse/{e.value}') if e.value else None)
 
     @ui.page('/browse/{category}')
     async def browse_category(category: str) -> None:
@@ -360,9 +369,7 @@ def register() -> None:
                     label='Category',
                     with_input=True,
                 ).classes('w-64')
-                cat_select.on_value_change(
-                    lambda e: ui.navigate.to(f'/browse/{e.value}') if e.value else None
-                )
+                cat_select.on_value_change(lambda e: ui.navigate.to(f'/browse/{e.value}') if e.value else None)
 
             await build_category_table(
                 category,

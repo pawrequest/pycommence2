@@ -35,7 +35,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Generator
+from collections.abc import Generator
 
 from pycommence2._com.connection import CommenceDB
 from pycommence2._com.constants import CMC_CURSOR_VIEW
@@ -272,7 +272,7 @@ class CommenceSession:
         max_rows: int = 200,
         canonical: bool = False,
         resolve: bool = True,
-    ) -> Generator[RowResult, None, None] | tuple[RowResult, ...]:
+    ) -> Generator[RowResult] | tuple[RowResult, ...]:
         """Read rows from a category with optional filtering/sorting.
 
         Args:
@@ -851,7 +851,7 @@ class CommenceSession:
         """
         self._db.close()
 
-    def __enter__(self) -> 'CommenceSession':
+    def __enter__(self) -> CommenceSession:
         return self
 
     def __exit__(self, *exc: object) -> None:

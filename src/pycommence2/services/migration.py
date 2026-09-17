@@ -13,8 +13,8 @@ log = logging.getLogger(__name__)
 
 
 def copy_category(
-    reader: 'ReaderService',
-    writer: 'WriterService',
+    reader: ReaderService,
+    writer: WriterService,
     from_category: str,
     to_category: str,
     field_map: dict[str, str] | None = None,

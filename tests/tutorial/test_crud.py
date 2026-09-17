@@ -91,12 +91,7 @@ class TestAddRow:
 
             # Verify all were added
             for n in names:
-                rows = (
-                    session.query(CATEGORY)
-                    .columns('contactKey')
-                    .where('contactKey', 'Equal To', n)
-                    .execute()
-                )
+                rows = session.query(CATEGORY).columns('contactKey').where('contactKey', 'Equal To', n).execute()
                 assert len(rows) == 1
         finally:
             for n in names:
@@ -105,12 +100,7 @@ class TestAddRow:
     @staticmethod
     def _delete_by_name(session: CommenceSession, name: str) -> None:
         """Helper: find row by name and delete it."""
-        rows = (
-            session.query(CATEGORY)
-            .columns('contactKey')
-            .where('contactKey', 'Equal To', name)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns('contactKey').where('contactKey', 'Equal To', name).execute()
         if rows and rows[0].row_id:
             session.delete(rows[0].row_id, CATEGORY)
 
@@ -178,12 +168,7 @@ class TestEditRow:
 
     @staticmethod
     def _cleanup(session: CommenceSession, name: str) -> None:
-        rows = (
-            session.query(CATEGORY)
-            .columns('contactKey')
-            .where('contactKey', 'Equal To', name)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns('contactKey').where('contactKey', 'Equal To', name).execute()
         if rows and rows[0].row_id:
             session.delete(rows[0].row_id, CATEGORY)
 
@@ -205,24 +190,14 @@ class TestDeleteRow:
         assert row_id is not None
 
         # Confirm it exists
-        rows = (
-            session.query(CATEGORY)
-            .columns('contactKey')
-            .where('contactKey', 'Equal To', name)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns('contactKey').where('contactKey', 'Equal To', name).execute()
         assert len(rows) == 1
 
         # Delete
         session.delete(row_id, CATEGORY)
 
         # Confirm it's gone
-        rows = (
-            session.query(CATEGORY)
-            .columns('contactKey')
-            .where('contactKey', 'Equal To', name)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns('contactKey').where('contactKey', 'Equal To', name).execute()
         assert len(rows) == 0
 
     def test_original_data_intact_after_tests(self, session: CommenceSession) -> None:
@@ -285,12 +260,7 @@ class TestCrudCycle:
         # DELETE
         session.delete(row_id, CATEGORY)
 
-        rows = (
-            session.query(CATEGORY)
-            .columns('contactKey')
-            .where('contactKey', 'Equal To', name)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns('contactKey').where('contactKey', 'Equal To', name).execute()
         assert len(rows) == 0
 
         # Verify tutorial data intact

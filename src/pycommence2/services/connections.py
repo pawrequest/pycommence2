@@ -19,7 +19,7 @@ class ConnectionService:
     API — they **must** use DDE Execute commands.
     """
 
-    def __init__(self, db: 'CommenceDB') -> None:
+    def __init__(self, db: CommenceDB) -> None:
         self._db = db
         self._conv = db.get_conversation()
 
@@ -52,10 +52,7 @@ class ConnectionService:
                 "Company", "Acme Corp",
             )
         """
-        cmd = (
-            f'[AssignConnection("{from_category}", "{from_item}", '
-            f'"{connection_name}", "{to_category}", "{to_item}")]'
-        )
+        cmd = f'[AssignConnection("{from_category}", "{from_item}", "{connection_name}", "{to_category}", "{to_item}")]'
         self._conv.execute(cmd)
         log.info(
             'Assigned connection: %s/%s -[%s]-> %s/%s',
@@ -95,8 +92,7 @@ class ConnectionService:
             )
         """
         cmd = (
-            f'[UnassignConnection("{from_category}", "{from_item}", '
-            f'"{connection_name}", "{to_category}", "{to_item}")]'
+            f'[UnassignConnection("{from_category}", "{from_item}", "{connection_name}", "{to_category}", "{to_item}")]'
         )
         self._conv.execute(cmd)
         log.info(
@@ -170,10 +166,7 @@ class ConnectionService:
                 "Is Employed by", "Company",
             )
         """
-        cmd = (
-            f'[GetConnectedItemCount("{from_category}", "{from_item}", '
-            f'"{connection_name}", "{to_category}")]'
-        )
+        cmd = f'[GetConnectedItemCount("{from_category}", "{from_item}", "{connection_name}", "{to_category}")]'
         raw = self._conv.request(cmd)
         return int(raw.strip())
 

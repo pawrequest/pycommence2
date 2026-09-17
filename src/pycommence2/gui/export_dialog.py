@@ -125,18 +125,16 @@ async def _render_export() -> None:
         except Exception as exc:
             notify_error(f'Export failed: {exc}')
 
-    ui.button('Export', icon='download', on_click=do_export).props('color=primary size=lg').classes(
-        'mt-4'
-    )
+    ui.button('Export', icon='download', on_click=do_export).props('color=primary size=lg').classes('mt-4')
 
     # -- Backup section ------------------------------------------------------
     ui.separator().classes('mt-6')
 
     with ui.card().classes('w-full'):
         ui.label('Full Backup').classes('text-xl font-bold')
-        ui.label(
-            'Export all (or selected) categories to a directory with schema metadata.'
-        ).classes('text-sm text-grey')
+        ui.label('Export all (or selected) categories to a directory with schema metadata.').classes(
+            'text-sm text-grey'
+        )
 
         with ui.column().classes('gap-4 w-full'):
             backup_cats = (
@@ -176,13 +174,8 @@ async def _render_export() -> None:
                     max_rows_per_category=li,
                 )
             )
-            notify_success(
-                f'Backup complete: {stats["categories_exported"]} categories, '
-                f'{stats["total_rows"]:,} rows'
-            )
+            notify_success(f'Backup complete: {stats["categories_exported"]} categories, {stats["total_rows"]:,} rows')
         except Exception as exc:
             notify_error(f'Backup failed: {exc}')
 
-    ui.button('Backup', icon='backup', on_click=do_backup).props('color=secondary size=lg').classes(
-        'mt-4'
-    )
+    ui.button('Backup', icon='backup', on_click=do_backup).props('color=secondary size=lg').classes('mt-4')

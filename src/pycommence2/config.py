@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import platformdirs
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 

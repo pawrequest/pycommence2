@@ -35,9 +35,7 @@ def _check_mcp_installed() -> None:
     try:
         import mcp  # noqa: F401
     except ImportError:
-        raise SystemExit(
-            "The MCP server requires the 'mcp' extra.\nInstall with:  pip install pycommence2[mcp]"
-        )
+        raise SystemExit("The MCP server requires the 'mcp' extra.\nInstall with:  pip install pycommence2[mcp]")
 
 
 def _build_server(*, read_only: bool = False) -> Any:

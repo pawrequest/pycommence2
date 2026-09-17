@@ -30,7 +30,7 @@ class ImportService:
             print(f"Imported {result['rows_imported']} rows")
     """
 
-    def __init__(self, session: 'CommenceSession') -> None:
+    def __init__(self, session: CommenceSession) -> None:
         self._session = session
 
     def from_csv(

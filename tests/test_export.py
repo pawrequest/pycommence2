@@ -33,9 +33,7 @@ def sample_rows() -> list[RowResult]:
 
 
 class TestToCsv:
-    def test_writes_csv(
-        self, svc: ExportService, sample_rows: list[RowResult], tmp_path: Path
-    ) -> None:
+    def test_writes_csv(self, svc: ExportService, sample_rows: list[RowResult], tmp_path: Path) -> None:
         out = tmp_path / 'test.csv'
         count = svc.to_csv(sample_rows, out)
         assert count == 3
@@ -45,9 +43,7 @@ class TestToCsv:
         assert rows[0]['Name'] == 'Alice'
         assert rows[2]['City'] == 'LA'
 
-    def test_csv_column_filter(
-        self, svc: ExportService, sample_rows: list[RowResult], tmp_path: Path
-    ) -> None:
+    def test_csv_column_filter(self, svc: ExportService, sample_rows: list[RowResult], tmp_path: Path) -> None:
         out = tmp_path / 'partial.csv'
         svc.to_csv(sample_rows, out, columns=['Name', 'Email'])
         rows = list(csv.DictReader(out.open(encoding='utf-8-sig')))
@@ -63,9 +59,7 @@ class TestToCsv:
 
 
 class TestToJson:
-    def test_writes_json(
-        self, svc: ExportService, sample_rows: list[RowResult], tmp_path: Path
-    ) -> None:
+    def test_writes_json(self, svc: ExportService, sample_rows: list[RowResult], tmp_path: Path) -> None:
         out = tmp_path / 'test.json'
         count = svc.to_json(sample_rows, out)
         assert count == 3
@@ -73,9 +67,7 @@ class TestToJson:
         assert len(data) == 3
         assert data[0]['Name'] == 'Alice'
 
-    def test_json_column_filter(
-        self, svc: ExportService, sample_rows: list[RowResult], tmp_path: Path
-    ) -> None:
+    def test_json_column_filter(self, svc: ExportService, sample_rows: list[RowResult], tmp_path: Path) -> None:
         out = tmp_path / 'partial.json'
         svc.to_json(sample_rows, out, columns=['Name'])
         data = json.loads(out.read_text(encoding='utf-8'))

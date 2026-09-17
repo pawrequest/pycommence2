@@ -23,14 +23,14 @@ class WriterService:
     All mutations go through the cursor/rowset API (Add/Edit/DeleteRowSet).
     """
 
-    def __init__(self, db: 'CommenceDB') -> None:
+    def __init__(self, db: CommenceDB) -> None:
         self._db = db
 
     # -- CREATE --------------------------------------------------------------
     def add_row(
-            self,
-            category: str,
-            fields: dict[str, str],
+        self,
+        category: str,
+        fields: dict[str, str],
     ) -> str | None:
         """Add a single row to *category* and return its row ID (if obtainable).
 
@@ -65,9 +65,9 @@ class WriterService:
             return None
 
     def add_rows(
-            self,
-            category: str,
-            rows: list[dict[str, str]],
+        self,
+        category: str,
+        rows: list[dict[str, str]],
     ) -> int:
         """Add multiple rows in a single batch.
 
@@ -101,10 +101,10 @@ class WriterService:
 
     # -- UPDATE --------------------------------------------------------------
     def edit_row_by_id(
-            self,
-            category: str,
-            row_id: str,
-            fields: dict[str, str],
+        self,
+        category: str,
+        row_id: str,
+        fields: dict[str, str],
     ) -> None:
         """Edit a single row identified by its unique row ID.
 
@@ -128,13 +128,13 @@ class WriterService:
             rs.commit()
 
     def edit_rows(
-            self,
-            category: str,
-            fields: dict[str, str],
-            *,
-            filters: list[str] | None = None,
-            logic: str | None = None,
-            max_rows: int = 100,
+        self,
+        category: str,
+        fields: dict[str, str],
+        *,
+        filters: list[str] | None = None,
+        logic: str | None = None,
+        max_rows: int = 100,
     ) -> int:
         """Edit rows matching optional filters.
 
@@ -190,12 +190,12 @@ class WriterService:
             rs.commit()
 
     def delete_rows(
-            self,
-            category: str,
-            *,
-            filters: list[str] | None = None,
-            logic: str | None = None,
-            max_rows: int = 100,
+        self,
+        category: str,
+        *,
+        filters: list[str] | None = None,
+        logic: str | None = None,
+        max_rows: int = 100,
     ) -> int:
         """Delete rows matching optional filters.
 
@@ -230,12 +230,12 @@ class WriterService:
 
     # -- UPSERT --------------------------------------------------------------
     def upsert_rows(
-            self,
-            category: str,
-            pk_field: str,
-            rows: list[dict[str, str]],
-            *,
-            reader: 'ReaderService | None' = None,
+        self,
+        category: str,
+        pk_field: str,
+        rows: list[dict[str, str]],
+        *,
+        reader: ReaderService | None = None,
     ) -> dict[str, int]:
         """Add-or-update rows based on primary-key match.
 

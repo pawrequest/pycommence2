@@ -98,9 +98,9 @@ async def _render_detail(category: str, row_id: str) -> None:
             notify_error(f'Save failed: {exc}')
 
     with ui.row().classes('gap-4 mt-4'):
-        ui.button('Save Changes', icon='save', on_click=save_changes).props(
-            'color=primary'
-        ).bind_enabled_from(state.app_state, 'edit_unlocked')
+        ui.button('Save Changes', icon='save', on_click=save_changes).props('color=primary').bind_enabled_from(
+            state.app_state, 'edit_unlocked'
+        )
 
         # Open in Commence
         async def open_in_commence() -> None:
@@ -132,9 +132,7 @@ async def _render_detail(category: str, row_id: str) -> None:
 
         if pk_value:
             for conn in connections:
-                with ui.expansion(f'{conn.name} → {conn.to_category}', icon='link').classes(
-                    'w-full'
-                ):
+                with ui.expansion(f'{conn.name} → {conn.to_category}', icon='link').classes('w-full'):
                     try:
                         connected_names = await worker.run(
                             lambda s, c=category, pk=pk_value, cn=conn.name, tc=conn.to_category: (
@@ -149,6 +147,4 @@ async def _render_detail(category: str, row_id: str) -> None:
                     except Exception as exc:
                         ui.label(f'  Error: {exc}').classes('text-sm text-red ml-4')
         else:
-            ui.label('Cannot load connections — item name field not found.').classes(
-                'text-sm text-grey'
-            )
+            ui.label('Cannot load connections — item name field not found.').classes('text-sm text-grey')

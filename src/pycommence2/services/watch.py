@@ -9,7 +9,8 @@ from __future__ import annotations
 import hashlib
 import logging
 import time
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
+from collections.abc import Generator
 
 from pycommence2.models import RowResult, WatchEvent
 
@@ -46,7 +47,7 @@ class PollWatcher:
 
     def __init__(
         self,
-        reader: 'ReaderService',
+        reader: ReaderService,
         category: str,
         *,
         columns: list[str] | None = None,
@@ -104,7 +105,7 @@ class PollWatcher:
 
         return events
 
-    def __iter__(self) -> Generator[WatchEvent, None, None]:
+    def __iter__(self) -> Generator[WatchEvent]:
         """Blocking generator — yields events until interrupted.
 
         Example::

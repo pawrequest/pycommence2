@@ -67,8 +67,7 @@ class CommenceDB:
         current = threading.current_thread()
         if current is not self._init_thread:
             log.warning(
-                'CommenceDB accessed from thread %r but was initialised on %r. '
-                'COM STA objects are NOT thread-safe.',
+                'CommenceDB accessed from thread %r but was initialised on %r. COM STA objects are NOT thread-safe.',
                 current.name,
                 self._init_thread.name,
             )
@@ -104,7 +103,7 @@ class CommenceDB:
         name: str,
         mode: int = 0,
         flags: int = 0,
-    ) -> 'CursorWrapper':
+    ) -> CursorWrapper:
         """Create and return a wrapped ICommenceCursor."""
         self._check_thread()
         from pycommence2._com.cursor import CursorWrapper
@@ -119,7 +118,7 @@ class CommenceDB:
     def get_conversation(
         self,
         topic: str | None = None,
-    ) -> 'ConversationWrapper':
+    ) -> ConversationWrapper:
         """Create and return a wrapped ICommenceConversation."""
         self._check_thread()
         from pycommence2._com.conversation import ConversationWrapper

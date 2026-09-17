@@ -24,17 +24,13 @@ from typing import TYPE_CHECKING
 try:
     import click
 except ImportError:
-    raise SystemExit(
-        "The CLI requires the 'cli' extra.  Install with:\n  pip install pycommence2[cli]"
-    )
+    raise SystemExit("The CLI requires the 'cli' extra.  Install with:\n  pip install pycommence2[cli]")
 
 try:
     from rich.console import Console
     from rich.table import Table
 except ImportError:
-    raise SystemExit(
-        "The CLI requires the 'cli' extra.  Install with:\n  pip install pycommence2[cli]"
-    )
+    raise SystemExit("The CLI requires the 'cli' extra.  Install with:\n  pip install pycommence2[cli]")
 
 if TYPE_CHECKING:
     from pycommence2.models import RowResult
@@ -49,7 +45,7 @@ console = Console()
 # ---------------------------------------------------------------------------
 
 
-def _get_session() -> 'CommenceSession':
+def _get_session() -> CommenceSession:
     """Create a CommenceSession, converting errors to ClickException."""
     from pycommence2.exceptions import CommenceNotFoundError
     from pycommence2.session import CommenceSession
@@ -58,8 +54,7 @@ def _get_session() -> 'CommenceSession':
         return CommenceSession()
     except CommenceNotFoundError as exc:
         raise click.ClickException(
-            f'Cannot connect to Commence: {exc}\n'
-            'Make sure Commence is running with a database open.'
+            f'Cannot connect to Commence: {exc}\nMake sure Commence is running with a database open.'
         )
 
 
@@ -83,7 +78,7 @@ def _parse_filter(raw: str) -> tuple[str, str, str]:
 # ---------------------------------------------------------------------------
 
 
-def _render_table(rows: list['RowResult']) -> None:
+def _render_table(rows: list[RowResult]) -> None:
     """Render rows as a rich table to the console."""
     if not rows:
         console.print('[dim]No rows returned.[/dim]')
@@ -97,13 +92,13 @@ def _render_table(rows: list['RowResult']) -> None:
     console.print(table)
 
 
-def _render_json(rows: list['RowResult']) -> None:
+def _render_json(rows: list[RowResult]) -> None:
     """Render rows as JSON array to stdout."""
     data = [r.to_dict() for r in rows]
     click.echo(json.dumps(data, indent=2, ensure_ascii=False))
 
 
-def _render_csv(rows: list['RowResult']) -> None:
+def _render_csv(rows: list[RowResult]) -> None:
     """Render rows as CSV to stdout."""
     if not rows:
         return
@@ -177,7 +172,7 @@ def schema(category: str | None) -> None:
         session.close()
 
 
-def _show_category_list(session: 'CommenceSession') -> None:
+def _show_category_list(session: CommenceSession) -> None:
     """Print all category names with row counts."""
     cats = session.schema.list_categories()
     table = Table(title=f'Categories ({len(cats)})')
@@ -193,7 +188,7 @@ def _show_category_list(session: 'CommenceSession') -> None:
     console.print(table)
 
 
-def _show_category_detail(session: 'CommenceSession', category: str) -> None:
+def _show_category_detail(session: CommenceSession, category: str) -> None:
     """Print fields and connections for a single category."""
     # Fields
     fields = session.schema.get_fields(category)
@@ -255,9 +250,7 @@ def _show_category_detail(session: 'CommenceSession', category: str) -> None:
     multiple=True,
     help="Filter as 'FIELD:QUALIFIER:VALUE' (repeatable).",
 )
-@click.option(
-    '-l', '--limit', default=50, show_default=True, type=int, help='Maximum rows to return.'
-)
+@click.option('-l', '--limit', default=50, show_default=True, type=int, help='Maximum rows to return.')
 @click.option(
     '--format',
     'fmt',
@@ -266,9 +259,7 @@ def _show_category_detail(session: 'CommenceSession', category: str) -> None:
     show_default=True,
     help='Output format.',
 )
-@click.option(
-    '--canonical', is_flag=True, help='Use canonical (locale-independent) data formatting.'
-)
+@click.option('--canonical', is_flag=True, help='Use canonical (locale-independent) data formatting.')
 def read(
     category: str,
     columns: str | None,
@@ -348,9 +339,7 @@ def count(category: str, filters: tuple[str, ...]) -> None:
     multiple=True,
     help="Filter as 'FIELD:QUALIFIER:VALUE' (repeatable).",
 )
-@click.option(
-    '-l', '--limit', default=50_000, show_default=True, type=int, help='Maximum rows to export.'
-)
+@click.option('-l', '--limit', default=50_000, show_default=True, type=int, help='Maximum rows to export.')
 @click.option(
     '--format',
     'fmt',
@@ -393,7 +382,7 @@ def export(
             for raw_f in filters:
                 field, qual, value = _parse_filter(raw_f)
                 qb.where(field, qual, value)
-            filter_strs = qb._filters  # noqa: SLF001
+            filter_strs = qb._filters
 
         count = session.export(
             category,
@@ -404,10 +393,7 @@ def export(
             max_rows=limit,
             canonical=canonical,
         )
-        console.print(
-            f'[bold green]✓[/bold green] Exported [bold]{count:,}[/bold] rows '
-            f'from {category} → {outfile}'
-        )
+        console.print(f'[bold green]✓[/bold green] Exported [bold]{count:,}[/bold] rows from {category} → {outfile}')
     finally:
         session.close()
 
@@ -419,12 +405,8 @@ def export(
 
 @cli.command()
 @click.argument('output_dir')
-@click.option(
-    '-c', '--categories', default=None, help='Comma-separated category names (default: all).'
-)
-@click.option(
-    '-l', '--limit', default=50_000, show_default=True, type=int, help='Maximum rows per category.'
-)
+@click.option('-c', '--categories', default=None, help='Comma-separated category names (default: all).')
+@click.option('-l', '--limit', default=50_000, show_default=True, type=int, help='Maximum rows per category.')
 @click.option(
     '--canonical/--no-canonical',
     default=True,
@@ -539,9 +521,7 @@ def import_cmd(
 
 
 @cli.command()
-@click.option(
-    '--read-only', is_flag=True, help='Disable write tools (add, edit, delete, connections).'
-)
+@click.option('--read-only', is_flag=True, help='Disable write tools (add, edit, delete, connections).')
 @click.option(
     '--transport',
     default='stdio',
@@ -575,10 +555,7 @@ def mcp(read_only: bool, transport: str, port: int) -> None:
     _check_mcp_installed()
     server = _build_server(read_only=read_only)
 
-    console.print(
-        f'[bold green]▶[/bold green] Starting MCP server '
-        f'(transport={transport}, read_only={read_only})'
-    )
+    console.print(f'[bold green]▶[/bold green] Starting MCP server (transport={transport}, read_only={read_only})')
 
     if transport == 'stdio':
         server.run(transport='stdio')
@@ -608,9 +585,7 @@ def gui(no_native: bool, port: int, reload: bool) -> None:
     try:
         from pycommence2.gui import run as gui_run
     except ImportError:
-        raise click.ClickException(
-            "The GUI requires the 'gui' extra.  Install with:\n  pip install pycommence2[gui]"
-        )
+        raise click.ClickException("The GUI requires the 'gui' extra.  Install with:\n  pip install pycommence2[gui]")
 
     gui_run(
         native=not no_native,

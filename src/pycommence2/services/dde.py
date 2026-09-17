@@ -18,7 +18,7 @@ class DdeService:
     (or only possible) via DDE: single-item CRUD, UI commands, triggers, etc.
     """
 
-    def __init__(self, db: 'CommenceDB') -> None:
+    def __init__(self, db: CommenceDB) -> None:
         self._db = db
         self._conv = db.get_conversation()
 

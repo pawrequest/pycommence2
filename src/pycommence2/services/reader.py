@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import logging
-from typing import Generator, TYPE_CHECKING
+from typing import TYPE_CHECKING
+from collections.abc import Generator
 
 from pycommence2._com.constants import BOOKMARK_BEGINNING, CMC_CURSOR_CATEGORY
 from pycommence2.models import RelatedColumn, RowResult
@@ -25,24 +26,24 @@ class ReaderService:
     per-request data limits.
     """
 
-    def __init__(self, db: 'CommenceDB') -> None:
+    def __init__(self, db: CommenceDB) -> None:
         self._db = db
 
     def read_rows(
-            self,
-            category: str,
-            *,
-            columns: list[str] | None = None,
-            related_columns: list[RelatedColumn] | None = None,
-            filters: list[str] | None = None,
-            logic: str | None = None,
-            sort: str | None = None,
-            max_rows: int = 500,
-            get_ids: bool = True,
-            canonical: bool = False,
-            mode: int = CMC_CURSOR_CATEGORY,
-            offset=0,
-    ) -> Generator[RowResult, None, None]:
+        self,
+        category: str,
+        *,
+        columns: list[str] | None = None,
+        related_columns: list[RelatedColumn] | None = None,
+        filters: list[str] | None = None,
+        logic: str | None = None,
+        sort: str | None = None,
+        max_rows: int = 500,
+        get_ids: bool = True,
+        canonical: bool = False,
+        mode: int = CMC_CURSOR_CATEGORY,
+        offset=0,
+    ) -> Generator[RowResult]:
         """Read rows from a category with optional filtering and sorting.
 
         Results are paginated internally in batches of 200 rows to avoid
@@ -135,12 +136,12 @@ class ReaderService:
                     break  # no more rows
 
     def read_by_id(
-            self,
-            category: str,
-            row_id: str,
-            *,
-            columns: list[str] | None = None,
-            canonical: bool = False,
+        self,
+        category: str,
+        row_id: str,
+        *,
+        columns: list[str] | None = None,
+        canonical: bool = False,
     ) -> RowResult:
         """Read a single row by its unique row ID.
 
@@ -167,19 +168,16 @@ class ReaderService:
                 raise RowsetError(f"No row found for ID '{row_id}' in '{category}'")
 
             labels = rs.column_labels()
-            row_data = {
-                labels[c]: rs.get_row_value(0, c, canonical=canonical)
-                for c in range(rs.column_count)
-            }
+            row_data = {labels[c]: rs.get_row_value(0, c, canonical=canonical) for c in range(rs.column_count)}
             return RowResult(columns=row_data, row_id=row_id)
 
     def count(
-            self,
-            category: str,
-            *,
-            filters: list[str] | None = None,
-            logic: str | None = None,
-            mode: int = CMC_CURSOR_CATEGORY,
+        self,
+        category: str,
+        *,
+        filters: list[str] | None = None,
+        logic: str | None = None,
+        mode: int = CMC_CURSOR_CATEGORY,
     ) -> int:
         """Return the number of rows in a category, respecting optional filters.
 

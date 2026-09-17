@@ -1,17 +1,15 @@
-from pathlib import Path
-
 from nicegui import ui
 
 from pycommence2 import FieldType
-from pycommence2.config import PycommenceSettings, Sort
 from pycommence2.gui.layout import frame, notify_error
 from pycommence2.gui import state
 from pycommence2.gui.emailer import Email
 
 RowId = str
 
-def query_f_settings():
-    ...
+
+def query_f_settings(): ...
+
 
 def make_query(session, category):
     qb = session.query(category).limit(200)
@@ -22,7 +20,7 @@ def make_query(session, category):
 def register():
     @ui.page('/emailer')
     async def emailer_page():
-        with (frame('Emailer')):
+        with frame('Emailer'):
             # Step 1: Select category
             if not state.worker or not state.worker.connected:
                 ui.label('⚠ Not connected to Commence.')
@@ -42,11 +40,11 @@ def register():
             with stock_row:
                 ui.button(
                     'Insert Greeting',
-                    on_click=lambda: body_input.set_value((body_input.value or '') + '\n[Greeting Placeholder]')
+                    on_click=lambda: body_input.set_value((body_input.value or '') + '\n[Greeting Placeholder]'),
                 )
                 ui.button(
                     'Insert Signature',
-                    on_click=lambda: body_input.set_value((body_input.value or '') + '\n[Signature Placeholder]')
+                    on_click=lambda: body_input.set_value((body_input.value or '') + '\n[Signature Placeholder]'),
                 )
             # State
             state_dict = {'fields': [], 'records': {}, 'email_fields': []}
@@ -64,21 +62,19 @@ def register():
                     state_dict['fields'] = field_defs
                     # Find email fields
                     email_fields = [f.name for f in field_defs if f.field_type is FieldType.EMAIL]
-                    name_field = next((f.name for f in field_defs if f.field_type is FieldType.NAME)) or None
+                    name_field = next(f.name for f in field_defs if f.field_type is FieldType.NAME) or None
                     if not name_field:
-                        raise ValueError("No name field found in category")
+                        raise ValueError('No name field found in category')
                     state_dict['email_fields'] = email_fields
                     email_field_select.set_options(email_fields)
-
 
                     records = await state.worker.run(make_query, cat)
                     state_dict['records'] = {r.row_id: r for r in records}
                     options = {r.row_id: r[name_field] for r in records}
                     record_select.set_options(options)
 
-
                 except Exception as exc:
-                    notify_error(f"Failed to load category data: {exc}")
+                    notify_error(f'Failed to load category data: {exc}')
                     record_select.options = []
                     email_field_select.options = []
 
@@ -125,6 +121,6 @@ def register():
                     subject=subject_input.value or '',
                     body=body_input.value or '',
                 )
-                ui.notify(f"Prepared email to: {email.to_address}")
+                ui.notify(f'Prepared email to: {email.to_address}')
 
             ui.button('Prepare Email', icon='email', on_click=on_prepare_email).props('color=primary')

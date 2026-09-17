@@ -125,8 +125,6 @@ class TestConnectionAssignUnassign:
         key_field: str,
         name: str,
     ) -> None:
-        rows = (
-            session.query(category).columns(key_field).where(key_field, 'Equal To', name).execute()
-        )
+        rows = session.query(category).columns(key_field).where(key_field, 'Equal To', name).execute()
         if rows and rows[0].row_id:
             session.delete(rows[0].row_id, category)

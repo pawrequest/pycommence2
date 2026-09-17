@@ -57,9 +57,7 @@ class TestKnownData:
     """Verify specific values we know from the Tutorial DB."""
 
     def test_gates_bill_exists(self, session: CommenceSession) -> None:
-        rows = session.read(
-            CATEGORY, columns=['contactKey', 'firstName', 'lastName', 'Title'], max_rows=100
-        )
+        rows = session.read(CATEGORY, columns=['contactKey', 'firstName', 'lastName', 'Title'], max_rows=100)
         gates = [r for r in rows if r['contactKey'] == 'Gates.Bill']
         assert len(gates) == 1
         assert gates[0]['firstName'] == 'Bill'

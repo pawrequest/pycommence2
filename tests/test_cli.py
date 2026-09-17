@@ -373,11 +373,7 @@ class TestExportCommand:
             )
         assert result.exit_code == 0
         call_kwargs = mock_session.export.call_args
-        assert (
-            call_kwargs[1]['format'] == 'json'
-            or call_kwargs[0][2] == 'json'
-            or 'json' in str(call_kwargs)
-        )
+        assert call_kwargs[1]['format'] == 'json' or call_kwargs[0][2] == 'json' or 'json' in str(call_kwargs)
 
     def test_export_with_columns(self, runner: CliRunner, mock_session: MagicMock) -> None:
         with patch('pycommence2.cli._get_session', return_value=mock_session):
@@ -468,9 +464,7 @@ class TestImportCommand:
         assert 'Imported' in result.output
         mock_session.import_json.assert_called_once()
 
-    def test_import_dry_run(
-        self, runner: CliRunner, mock_session: MagicMock, tmp_path: Path
-    ) -> None:
+    def test_import_dry_run(self, runner: CliRunner, mock_session: MagicMock, tmp_path: Path) -> None:
         mock_session.import_csv.return_value = {
             'rows_parsed': 10,
             'rows_imported': 0,
@@ -483,9 +477,7 @@ class TestImportCommand:
         assert result.exit_code == 0
         assert 'DRY RUN' in result.output
 
-    def test_import_with_limit(
-        self, runner: CliRunner, mock_session: MagicMock, tmp_path: Path
-    ) -> None:
+    def test_import_with_limit(self, runner: CliRunner, mock_session: MagicMock, tmp_path: Path) -> None:
         csv_file = tmp_path / 'data.csv'
         csv_file.write_text('Name\nAlice\n', encoding='utf-8')
         with patch('pycommence2.cli._get_session', return_value=mock_session):
@@ -501,9 +493,7 @@ class TestImportCommand:
             )
         assert result.exit_code == 0
 
-    def test_import_unsupported_format(
-        self, runner: CliRunner, mock_session: MagicMock, tmp_path: Path
-    ) -> None:
+    def test_import_unsupported_format(self, runner: CliRunner, mock_session: MagicMock, tmp_path: Path) -> None:
         bad_file = tmp_path / 'data.parquet'
         bad_file.write_text('nope', encoding='utf-8')
         with patch('pycommence2.cli._get_session', return_value=mock_session):
@@ -511,9 +501,7 @@ class TestImportCommand:
         assert result.exit_code != 0
         assert 'Unsupported import format' in result.output
 
-    def test_import_reports_errors(
-        self, runner: CliRunner, mock_session: MagicMock, tmp_path: Path
-    ) -> None:
+    def test_import_reports_errors(self, runner: CliRunner, mock_session: MagicMock, tmp_path: Path) -> None:
         mock_session.import_csv.return_value = {
             'rows_parsed': 3,
             'rows_imported': 2,
@@ -561,23 +549,17 @@ class TestEdgeCases:
             runner.invoke(cli, ['read', 'Contact'])
         mock_session.close.assert_called_once()
 
-    def test_session_close_called_on_count(
-        self, runner: CliRunner, mock_session: MagicMock
-    ) -> None:
+    def test_session_close_called_on_count(self, runner: CliRunner, mock_session: MagicMock) -> None:
         with patch('pycommence2.cli._get_session', return_value=mock_session):
             runner.invoke(cli, ['count', 'Contact'])
         mock_session.close.assert_called_once()
 
-    def test_session_close_called_on_schema(
-        self, runner: CliRunner, mock_session: MagicMock
-    ) -> None:
+    def test_session_close_called_on_schema(self, runner: CliRunner, mock_session: MagicMock) -> None:
         with patch('pycommence2.cli._get_session', return_value=mock_session):
             runner.invoke(cli, ['schema'])
         mock_session.close.assert_called_once()
 
-    def test_session_close_called_on_export(
-        self, runner: CliRunner, mock_session: MagicMock
-    ) -> None:
+    def test_session_close_called_on_export(self, runner: CliRunner, mock_session: MagicMock) -> None:
         with patch('pycommence2.cli._get_session', return_value=mock_session):
             runner.invoke(cli, ['export', 'Contact', 'out.csv'])
         mock_session.close.assert_called_once()

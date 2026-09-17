@@ -15,7 +15,8 @@ import logging
 import queue
 import threading
 from concurrent.futures import Future
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
+from collections.abc import Callable
 
 log = logging.getLogger(__name__)
 

@@ -48,18 +48,15 @@ class CursorWrapper:
                 raise CursorError(f"SetColumn({idx}, '{name}') failed")
 
     def set_related_column(
-            self,
-            col_index: int,
-            connection_name: str,
-            connected_category: str,
-            field_name: str,
+        self,
+        col_index: int,
+        connection_name: str,
+        connected_category: str,
+        field_name: str,
     ) -> None:
-        if not self._cur.SetRelatedColumn(
-                col_index, connection_name, connected_category, field_name, 0
-        ):
+        if not self._cur.SetRelatedColumn(col_index, connection_name, connected_category, field_name, 0):
             raise CursorError(
-                f"SetRelatedColumn({col_index}, '{connection_name}', "
-                f"'{connected_category}', '{field_name}') failed"
+                f"SetRelatedColumn({col_index}, '{connection_name}', '{connected_category}', '{field_name}') failed"
             )
 
     def set_filter(self, filter_text: str) -> None:
@@ -170,7 +167,7 @@ class CursorWrapper:
             raise RowsetError(f"GetDeleteRowSetByID('{row_id}') returned NULL")
         return RowsetWrapper(raw)
 
-    def __enter__(self) -> 'CursorWrapper':
+    def __enter__(self) -> CursorWrapper:
         return self
 
     def __exit__(self, *exc: object) -> None:

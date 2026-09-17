@@ -24,12 +24,7 @@ class TestQueryBuilderBasic:
 
 class TestQueryWithColumns:
     def test_columns_selection(self, session: CommenceSession) -> None:
-        rows = (
-            session.query(CATEGORY)
-            .columns('contactKey', 'firstName', 'lastName')
-            .limit(3)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns('contactKey', 'firstName', 'lastName').limit(3).execute()
         for row in rows:
             assert set(row.columns.keys()) == {'contactKey', 'firstName', 'lastName'}
 
@@ -37,31 +32,20 @@ class TestQueryWithColumns:
 class TestQueryWithFilter:
     def test_where_equal_to(self, session: CommenceSession) -> None:
         rows = (
-            session.query(CATEGORY)
-            .columns('contactKey', 'firstName')
-            .where('firstName', 'Equal To', 'Bill')
-            .execute()
+            session.query(CATEGORY).columns('contactKey', 'firstName').where('firstName', 'Equal To', 'Bill').execute()
         )
         assert len(rows) >= 1
         assert all(r['firstName'] == 'Bill' for r in rows)
 
     def test_where_contains(self, session: CommenceSession) -> None:
-        rows = (
-            session.query(CATEGORY)
-            .columns('contactKey', 'busCity')
-            .where('busCity', 'Contains', 'Los')
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns('contactKey', 'busCity').where('busCity', 'Contains', 'Los').execute()
         assert len(rows) >= 1
         for row in rows:
             assert 'Los' in row['busCity']
 
     def test_where_no_results(self, session: CommenceSession) -> None:
         rows = (
-            session.query(CATEGORY)
-            .columns('contactKey')
-            .where('firstName', 'Equal To', 'ZZZNONEXISTENT999')
-            .execute()
+            session.query(CATEGORY).columns('contactKey').where('firstName', 'Equal To', 'ZZZNONEXISTENT999').execute()
         )
         assert len(rows) == 0
 
@@ -91,22 +75,12 @@ class TestQueryWithFilter:
 
 class TestQueryWithSort:
     def test_sort_ascending(self, session: CommenceSession) -> None:
-        rows = (
-            session.query(CATEGORY)
-            .columns('contactKey')
-            .sort('contactKey', ascending=True)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns('contactKey').sort('contactKey', ascending=True).execute()
         names = [r['contactKey'] for r in rows]
         assert names == sorted(names)
 
     def test_sort_descending(self, session: CommenceSession) -> None:
-        rows = (
-            session.query(CATEGORY)
-            .columns('contactKey')
-            .sort('contactKey', ascending=False)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns('contactKey').sort('contactKey', ascending=False).execute()
         names = [r['contactKey'] for r in rows]
         assert names == sorted(names, reverse=True)
 

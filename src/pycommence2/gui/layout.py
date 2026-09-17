@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from typing import Generator
+from collections.abc import Generator
 
 from nicegui import ui
 
@@ -11,7 +11,7 @@ from pycommence2.gui import state
 
 
 @contextmanager
-def frame(title: str = '') -> Generator[None, None, None]:
+def frame(title: str = '') -> Generator[None]:
     """Wrap page content in the standard app layout.
 
     Provides a header bar with navigation, DB info badge, and an
@@ -48,9 +48,7 @@ def frame(title: str = '') -> Generator[None, None, None]:
                 ui.label('Disconnected').classes('text-white text-sm')
 
             # edit-lock toggle
-            switch = ui.switch('Edit mode', value=state.app_state.edit_unlocked).classes(
-                'text-white'
-            )
+            switch = ui.switch('Edit mode', value=state.app_state.edit_unlocked).classes('text-white')
             switch.on_value_change(lambda e: _set_edit_mode(e.value))
 
     # -- page content --------------------------------------------------------

@@ -14,7 +14,8 @@ which owns a dedicated daemon thread that:
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
+from collections.abc import Callable
 
 from pycommence2._thread_dispatch import ThreadDispatcher
 

@@ -81,9 +81,7 @@ class TestMergeTemplate:
     def test_merge_template(self):
         svc, conv = _make_dde()
         svc.merge_template('Contact', 'Jane Doe', 'Letter', 'C:\\letter.doc')
-        conv.execute.assert_called_once_with(
-            '[MergeTemplateCreate("Contact", "Jane Doe", "Letter", "C:\\letter.doc")]'
-        )
+        conv.execute.assert_called_once_with('[MergeTemplateCreate("Contact", "Jane Doe", "Letter", "C:\\letter.doc")]')
 
 
 # ---------------------------------------------------------------------------
@@ -95,16 +93,12 @@ class TestFormScripts:
     def test_check_out_form_script(self):
         svc, conv = _make_dde()
         svc.check_out_form_script('Contact', 'Detail', 'C:\\script.vbs')
-        conv.execute.assert_called_once_with(
-            '[CheckOutFormScript("Contact", "Detail", "C:\\script.vbs")]'
-        )
+        conv.execute.assert_called_once_with('[CheckOutFormScript("Contact", "Detail", "C:\\script.vbs")]')
 
     def test_check_in_form_script(self):
         svc, conv = _make_dde()
         svc.check_in_form_script('Contact', 'Detail', 'C:\\script.vbs')
-        conv.execute.assert_called_once_with(
-            '[CheckInFormScript("Contact", "Detail", "C:\\script.vbs")]'
-        )
+        conv.execute.assert_called_once_with('[CheckInFormScript("Contact", "Detail", "C:\\script.vbs")]')
 
 
 # ---------------------------------------------------------------------------

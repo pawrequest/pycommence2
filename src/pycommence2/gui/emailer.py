@@ -5,6 +5,7 @@ from pathlib import Path
 @dataclass
 class Email:
     """Dataclass representing an email"""
+
     to_address: str
     subject: str
     body: str

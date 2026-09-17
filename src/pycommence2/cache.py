@@ -14,7 +14,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -47,7 +47,7 @@ def _get_mtime_iso(path: Path) -> str | None:
     """Return the mtime of a file as an ISO 8601 string, or None on failure."""
     try:
         stat = path.stat()
-        return datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat()
+        return datetime.fromtimestamp(stat.st_mtime, tz=UTC).isoformat()
     except OSError:
         return None
 

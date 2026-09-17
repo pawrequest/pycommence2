@@ -212,9 +212,7 @@ class TestSketchyNames:
     @pytest.fixture(scope='class')
     def all_names(self, session: CommenceSession, pk_field: str) -> list[str]:
         """Fetch every PK value in the category (once per class)."""
-        rows = session.read(
-            CATEGORY, columns=[pk_field], max_rows=session.schema.get_row_count(CATEGORY)
-        )
+        rows = session.read(CATEGORY, columns=[pk_field], max_rows=session.schema.get_row_count(CATEGORY))
         return [r[pk_field] for r in rows]
 
     @pytest.fixture(scope='class')
@@ -238,9 +236,7 @@ class TestSketchyNames:
 
     def test_sketchy_names_exist(self, sketchy_names: list[str]) -> None:
         """Sanity: the fixture actually found some."""
-        log.info(
-            'Found %d sketchy names (showing first 5): %s', len(sketchy_names), sketchy_names[:5]
-        )
+        log.info('Found %d sketchy names (showing first 5): %s', len(sketchy_names), sketchy_names[:5])
         assert len(sketchy_names) > 0
 
     def test_read_by_id_for_sketchy_rows(
@@ -280,13 +276,7 @@ class TestSketchyNames:
         start = max(0, slash_idx - 2)
         substring = target[start : slash_idx + 3]
 
-        rows = (
-            session.query(CATEGORY)
-            .columns(pk_field)
-            .where(pk_field, 'Contains', substring)
-            .limit(100)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns(pk_field).where(pk_field, 'Contains', substring).limit(100).execute()
         matched_names = {r[pk_field] for r in rows}
         assert target in matched_names, f'Expected {target!r} in results for Contains {substring!r}'
 
@@ -351,8 +341,7 @@ class TestDdeCursorConsistency:
             dde_val = session.dde.get_field(CATEGORY, item_name, field)
             cursor_val = row[field]
             assert dde_val == cursor_val, (
-                f"Mismatch on '{field}' for item {item_name!r}: "
-                f'DDE={dde_val!r} vs cursor={cursor_val!r}'
+                f"Mismatch on '{field}' for item {item_name!r}: DDE={dde_val!r} vs cursor={cursor_val!r}"
             )
 
 
@@ -371,20 +360,8 @@ class TestQueryBuilderAgnostic:
         ``-``, ``?``, ``+`` sort differently from Python).  We verify the sort
         was applied by checking ascending ≠ descending rather than comparing
         against Python's sorted() output."""
-        asc = (
-            session.query(CATEGORY)
-            .columns(pk_field)
-            .sort(pk_field, ascending=True)
-            .limit(20)
-            .execute()
-        )
-        desc = (
-            session.query(CATEGORY)
-            .columns(pk_field)
-            .sort(pk_field, ascending=False)
-            .limit(20)
-            .execute()
-        )
+        asc = session.query(CATEGORY).columns(pk_field).sort(pk_field, ascending=True).limit(20).execute()
+        desc = session.query(CATEGORY).columns(pk_field).sort(pk_field, ascending=False).limit(20).execute()
         asc_names = [r[pk_field] for r in asc]
         desc_names = [r[pk_field] for r in desc]
         # The two orderings must be different (unless ≤20 total rows)
@@ -397,21 +374,13 @@ class TestQueryBuilderAgnostic:
         pk_field: str,
     ) -> None:
         """Descending sort should put Z-names first (alphabetically last items)."""
-        rows = (
-            session.query(CATEGORY)
-            .columns(pk_field)
-            .sort(pk_field, ascending=False)
-            .limit(20)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns(pk_field).sort(pk_field, ascending=False).limit(20).execute()
         names = [r[pk_field] for r in rows]
         # First result should start with a letter from the end of the alphabet
         # (or at least be lexicographically greater than the last)
         first_alpha = names[0][0] if names[0] and names[0][0].isalpha() else ''
         if first_alpha:
-            assert first_alpha.upper() >= 'M', (
-                f'Descending sort starts with {names[0]!r} – expected late-alphabet'
-            )
+            assert first_alpha.upper() >= 'M', f'Descending sort starts with {names[0]!r} – expected late-alphabet'
 
     def test_count_no_filter(
         self,
@@ -469,13 +438,7 @@ class TestQueryBuilderAgnostic:
             pytest.skip('No CHECK_BOX fields in this category')
 
         cb_name = cb_fields[0].name
-        rows = (
-            session.query(CATEGORY)
-            .columns(pk_field, cb_name)
-            .where(cb_name, 'Checked', '')
-            .limit(10)
-            .execute()
-        )
+        rows = session.query(CATEGORY).columns(pk_field, cb_name).where(cb_name, 'Checked', '').limit(10).execute()
         # We can't predict the count, but the call must not error
         assert isinstance(rows, list)
 
@@ -534,9 +497,7 @@ class TestDataSizeEdgeCases:
         rows = session.read(CATEGORY, max_rows=5)
         for row in rows:
             for col_name, value in row.columns.items():
-                assert isinstance(value, str), (
-                    f'Column {col_name!r} has non-str value: {type(value)}'
-                )
+                assert isinstance(value, str), f'Column {col_name!r} has non-str value: {type(value)}'
 
     def test_read_by_id_all_columns(self, session: CommenceSession) -> None:
         """read_by_id with all columns — single-row but maximum width."""
@@ -558,6 +519,4 @@ class TestDataSizeEdgeCases:
         # No None IDs
         assert all(rid is not None for rid in ids)
         # No duplicate IDs
-        assert len(set(ids)) == len(ids), (
-            f'Duplicate row IDs found: {len(ids)} rows but {len(set(ids))} unique'
-        )
+        assert len(set(ids)) == len(ids), f'Duplicate row IDs found: {len(ids)} rows but {len(set(ids))} unique'

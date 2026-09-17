@@ -36,7 +36,7 @@ class SchemaService:
     to force a fresh lookup.
     """
 
-    def __init__(self, db: 'CommenceDB') -> None:
+    def __init__(self, db: CommenceDB) -> None:
         self._db = db
         self._conv = db.get_conversation()
         self._cache = SchemaCache(db.name, db.path)
@@ -118,9 +118,7 @@ class SchemaService:
             allows_duplicates = flag_str[-2] == '1'
             has_clarify = flag_str[-1] == '1'
         except (ValueError, IndexError) as exc:
-            raise SchemaError(
-                f"Failed to parse GetCategoryDefinition flags for '{category}': {raw!r}"
-            ) from exc
+            raise SchemaError(f"Failed to parse GetCategoryDefinition flags for '{category}': {raw!r}") from exc
 
         clarify_sep = parts[2].strip() if len(parts) > 2 else ''
         clarify_field = parts[3].strip() if len(parts) > 3 else ''
@@ -195,9 +193,7 @@ class SchemaService:
         raw = self._conv.request(f'[GetFieldDefinition("{category}", "{field_name}", "{_DELIM}")]')
         parts = raw.split(_DELIM)
         if len(parts) < 3:
-            raise SchemaError(
-                f"Unexpected GetFieldDefinition response for '{category}'.'{field_name}': {raw!r}"
-            )
+            raise SchemaError(f"Unexpected GetFieldDefinition response for '{category}'.'{field_name}': {raw!r}")
 
         field_type_code = int(parts[0].strip())
         flags = parts[1].strip().zfill(10)
@@ -286,9 +282,7 @@ class SchemaService:
         # Try cache
         cached_dicts = self._cache.get_connections(category)
         if cached_dicts is not None:
-            return [
-                ConnectionInfo(name=d['name'], to_category=d['to_category']) for d in cached_dicts
-            ]
+            return [ConnectionInfo(name=d['name'], to_category=d['to_category']) for d in cached_dicts]
 
         raw = self._conv.request(f'[GetConnectionNames("{category}", "{_DELIM}", "::")]')
         connections: list[ConnectionInfo] = []
@@ -298,9 +292,7 @@ class SchemaService:
                 continue
             if '::' in entry:
                 conn_name, to_cat = entry.split('::', 1)
-                connections.append(
-                    ConnectionInfo(name=conn_name.strip(), to_category=to_cat.strip())
-                )
+                connections.append(ConnectionInfo(name=conn_name.strip(), to_category=to_cat.strip()))
             else:
                 # Fallback: if no delimiter between conn/cat, treat whole thing as name
                 connections.append(ConnectionInfo(name=entry, to_category=''))

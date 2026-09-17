@@ -47,11 +47,7 @@ class TestQueryView:
         all_count = session.query_view(view_name).count()
 
         # Add a restrictive filter — should return ≤ all_count
-        filtered = (
-            session.query_view(view_name)
-            .where('firstName', 'Equal To', 'ZZZNONEXISTENT999')
-            .count()
-        )
+        filtered = session.query_view(view_name).where('firstName', 'Equal To', 'ZZZNONEXISTENT999').count()
         assert filtered <= all_count
 
 
@@ -60,13 +56,7 @@ class TestCanonicalMode:
 
     def test_canonical_flag_passes_through(self, session: CommenceSession) -> None:
         """Read a row with canonical=True and verify we get data back."""
-        rows = (
-            session.query('Contact')
-            .columns('contactKey', 'firstName')
-            .canonical(True)
-            .limit(1)
-            .execute()
-        )
+        rows = session.query('Contact').columns('contactKey', 'firstName').canonical(True).limit(1).execute()
         assert len(rows) == 1
         assert rows[0]['contactKey']
 

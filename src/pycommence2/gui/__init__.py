@@ -27,7 +27,6 @@ def create_app() -> None:
         detail,
         export_dialog,
         schema_explorer,
-        emailer_page,
     )
 
     # Start the COM worker
@@ -35,9 +34,7 @@ def create_app() -> None:
     state.worker.start()
 
     if not state.worker.connected:
-        log.error(
-            'GUI starting in disconnected mode — Commence is not running or no database is open.'
-        )
+        log.error('GUI starting in disconnected mode — Commence is not running or no database is open.')
 
     # Register all page routes
     dashboard.register()
@@ -79,6 +76,7 @@ def run(
         reload=reload,
         window_size=(1280, 800),
     )
+
 
 if __name__ == '__main__':
     run()

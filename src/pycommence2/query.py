@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from functools import reduce
 from pathlib import Path
-from typing import Generator, TYPE_CHECKING
+from typing import TYPE_CHECKING
+from collections.abc import Generator
 
 from pycommence2._com.constants import CMC_CURSOR_CATEGORY
 from pycommence2.config import PycommenceSettings
@@ -31,11 +32,11 @@ class QueryBuilder:
     """
 
     def __init__(
-            self,
-            category: str,
-            reader: 'ReaderService',
-            *,
-            mode: int = CMC_CURSOR_CATEGORY,
+        self,
+        category: str,
+        reader: ReaderService,
+        *,
+        mode: int = CMC_CURSOR_CATEGORY,
     ) -> None:
         self._category = category
         self._reader = reader
@@ -52,7 +53,7 @@ class QueryBuilder:
         self._offset: int = 0
 
     # -- column selection ----------------------------------------------------
-    def columns(self, *fields: str) -> 'QueryBuilder':
+    def columns(self, *fields: str) -> QueryBuilder:
         """Select specific columns to return.
 
         If not called, all fields in the category are returned.
@@ -72,12 +73,12 @@ class QueryBuilder:
 
     # -- filtering -----------------------------------------------------------
     def where(
-            self,
-            field: str,
-            qualifier: str,
-            value: str = '',
-            case_sensitive: bool = False,
-    ) -> 'QueryBuilder':
+        self,
+        field: str,
+        qualifier: str,
+        value: str = '',
+        case_sensitive: bool = False,
+    ) -> QueryBuilder:
         """Add a field filter clause (FilterType=F).
 
         Args:
@@ -104,20 +105,18 @@ class QueryBuilder:
         if self._filter_counter > 4:
             raise ValueError('Commence supports a maximum of 4 filter clauses')
         cs = 'True' if case_sensitive else 'False'
-        clause = (
-            f'[ViewFilter({self._filter_counter}, F, , "{field}", "{qualifier}", "{value}", {cs})]'
-        )
+        clause = f'[ViewFilter({self._filter_counter}, F, , "{field}", "{qualifier}", "{value}", {cs})]'
         self._filters.append(clause)
         return self
 
     def where_connection(
-            self,
-            connection_name: str,
-            connected_category: str,
-            item_name: str,
-            *,
-            not_flag: bool = False,
-    ) -> 'QueryBuilder':
+        self,
+        connection_name: str,
+        connected_category: str,
+        item_name: str,
+        *,
+        not_flag: bool = False,
+    ) -> QueryBuilder:
         """Add a 'Connection To Item' filter clause (CTI).
 
         Filters rows that are (or are not) connected to a specific item.
@@ -153,16 +152,16 @@ class QueryBuilder:
         return self
 
     def where_connected_field(
-            self,
-            connection_name: str,
-            connected_category: str,
-            field: str,
-            qualifier: str,
-            value: str = '',
-            case_sensitive: bool = False,
-            *,
-            not_flag: bool = False,
-    ) -> 'QueryBuilder':
+        self,
+        connection_name: str,
+        connected_category: str,
+        field: str,
+        qualifier: str,
+        value: str = '',
+        case_sensitive: bool = False,
+        *,
+        not_flag: bool = False,
+    ) -> QueryBuilder:
         """Add a 'Connection To Category Field' filter clause (CTCF).
 
         Filters rows based on a field value in a connected item.
@@ -202,7 +201,7 @@ class QueryBuilder:
         self._filters.append(clause)
         return self
 
-    def raw_filter(self, filter_string: str) -> 'QueryBuilder':
+    def raw_filter(self, filter_string: str) -> QueryBuilder:
         """Add a raw DDE-style filter string (escape hatch).
 
         Use this when the high-level ``where`` methods don't cover your
@@ -226,11 +225,11 @@ class QueryBuilder:
         return self
 
     def related_column(
-            self,
-            connection: str,
-            category: str,
-            field: str,
-    ) -> 'QueryBuilder':
+        self,
+        connection: str,
+        category: str,
+        field: str,
+    ) -> QueryBuilder:
         """Include a connected/indirect field in the result set.
 
         Uses ``ICommenceCursor.SetRelatedColumn`` under the hood.
@@ -252,7 +251,7 @@ class QueryBuilder:
         self._related_columns.append(RelatedColumn(connection, category, field))
         return self
 
-    def conjunction(self, logic: str) -> 'QueryBuilder':
+    def conjunction(self, logic: str) -> QueryBuilder:
         """Set the filter logic for combining multiple filter clauses.
 
         By default, Commence uses AND between all clauses. Use this to
@@ -276,7 +275,7 @@ class QueryBuilder:
         return self
 
     # -- sorting -------------------------------------------------------------
-    def sort(self, field: str, ascending: bool = True) -> 'QueryBuilder':
+    def sort(self, field: str, ascending: bool = True) -> QueryBuilder:
         """Add a sort field. Call multiple times to add up to 4 sort fields.
 
         Args:
@@ -296,7 +295,7 @@ class QueryBuilder:
         return self
 
     # -- limits --------------------------------------------------------------
-    def limit(self, n: int) -> 'QueryBuilder':
+    def limit(self, n: int) -> QueryBuilder:
         """Set the maximum number of rows to return.
 
         Defaults to 500 if not called.
@@ -310,7 +309,7 @@ class QueryBuilder:
         self._max_rows = n
         return self
 
-    def with_ids(self, val: bool = True) -> 'QueryBuilder':
+    def with_ids(self, val: bool = True) -> QueryBuilder:
         """Control whether each ``RowResult`` includes a ``row_id``.
 
         Row IDs are required for subsequent ``edit()`` / ``delete()``
@@ -325,7 +324,7 @@ class QueryBuilder:
         self._get_ids = val
         return self
 
-    def canonical(self, val: bool = True) -> 'QueryBuilder':
+    def canonical(self, val: bool = True) -> QueryBuilder:
         """Enable canonical data format (locale-independent).
 
         Dates become ``yyyymmdd``, times ``hh:mm`` (24-hr), numbers
@@ -340,7 +339,7 @@ class QueryBuilder:
         self._canonical = val
         return self
 
-    def offset(self, n: int) -> 'QueryBuilder':
+    def offset(self, n: int) -> QueryBuilder:
         """Set the number of rows to skip from the start (for pagination).
 
         Defaults to 0 if not called.
@@ -355,8 +354,9 @@ class QueryBuilder:
         return self
 
     # -- execute -------------------------------------------------------------
-    def execute(self, resolve: bool = True, apply_settings: bool = False, offset=0) \
-            -> Generator[RowResult, None, None] | tuple[RowResult]:
+    def execute(
+        self, resolve: bool = True, apply_settings: bool = False, offset=0
+    ) -> Generator[RowResult] | tuple[RowResult]:
         """Run the query and return results.
 
         Assembles the accumulated columns, filters, sort, and options
@@ -422,10 +422,10 @@ class QueryBuilder:
             mode=self._mode,
         )
 
-    def apply_settings(self, toml_path: Path | None = None) -> 'QueryBuilder':
-        if toml_path is None:
-            toml_path = Path(__file__).parent.parent.parent / 'data' / 'config.toml'
-        settings = PycommenceSettings.from_toml(toml_path)
+    def apply_settings(self, toml_path: Path | None = None) -> QueryBuilder:
+        settings = (
+            PycommenceSettings.from_toml(toml_path) if toml_path and toml_path.is_file() else PycommenceSettings()
+        )
 
         sorts = settings.sorts.get(self._category, [])
         return reduce(
