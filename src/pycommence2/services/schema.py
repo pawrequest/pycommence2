@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 # Delimiter we inject into DDE requests so we can split reliably
-_DELIM = '|'
+_DELIM = '|](?|'
 
 
 class SchemaService:
