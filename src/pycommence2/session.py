@@ -900,13 +900,16 @@ class CommenceSession:
         return f'<CommenceSession db={self.db_name!r}>'
 
     def pk_label(self, category) -> str:
-        with self._db.get_cursor(category) as cur:
-            rs = cur.get_query_rowset(1)
-            pk_field_naive = rs.get_column_label(0)
-            field_info = self.schema.get_field_definition(category, pk_field_naive)
-            if field_info.field_type == FieldType.NAME:
-                return pk_field_naive
-            raise SchemaError('First Column not Name Type')
+        fields = self.schema.get_fields(category)
+        return next(iter([_.name for _ in fields if _.field_type == FieldType.NAME]))
+
+        # with self._db.get_cursor(category) as cur:
+        #     rs = cur.get_query_rowset(1)
+        #     pk_field_naive = rs.get_column_label(0)
+        #     field_info = self.schema.get_field_definition(category, pk_field_naive)
+        #     if field_info.field_type == FieldType.NAME:
+        #         return pk_field_naive
+        #     raise SchemaError('First Column not Name Type')
 
     def read_by_pk(self, category, pk_value) -> RowResult:
         pk_label = self.pk_label(category=category)
@@ -915,7 +918,7 @@ class CommenceSession:
         raise_for_one(res)
         return res[0]
 
-    def read_by_id_or_pk(self, category, row_id: str = '', pk_value: str = '') -> RowResult:
+    def read_by_id_or_pk(self, *, category, row_id: str = '', pk_value: str = '') -> RowResult:
         raise_for_id_or_pk(row_id, pk_value)
         if row_id:
             return self.read_by_id(category, row_id)
