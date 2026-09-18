@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import date, time
 from enum import IntEnum
 from typing import Any
-from collections.abc import Iterator
 
 
 # ---------------------------------------------------------------------------
@@ -226,6 +226,9 @@ class RowResult:
                 continue
             result[col_name] = _coerce_value(raw, fi.field_type)
         return result
+
+
+ResultTuple = tuple[RowResult, ...]
 
 
 def _coerce_value(raw: str, ft: FieldType) -> Any:

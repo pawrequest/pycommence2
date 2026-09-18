@@ -27,6 +27,7 @@ gui = ["nicegui>=2.0", "pywebview>=5.0"]
 mcp = ["mcp>=1.0", "fastmcp>=3.2.3"]
 dev = ["pytest>=8.0", "pytest-asyncio>=1.0", "ruff>=0.4"]
 docs = ["mkdocs-material>=9.0", "mkdocstrings[python]>=0.25"]
+qr = ["qrcode[pil]>=8.2"]
 
 [project.scripts]
 pycommence = "pycommence.cli:cli"
@@ -39,3 +40,4 @@ addopts = "-v --tb=short"
 [build-system]
 requires = ["uv_build>=0.9.2,<0.10.0"]
 build-backend = "uv_build"
+

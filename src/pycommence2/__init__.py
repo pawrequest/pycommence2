@@ -26,7 +26,7 @@ from pycommence2.models import (
     WatchEvent,
 )
 from pycommence2.async_session import AsyncCommenceSession
-from pycommence2.query import QueryBuilder
+from pycommence2.query import ConditionType, QueryBuilder
 from pycommence2.services.backup import BackupService
 from pycommence2.services.connections import ConnectionService
 from pycommence2.services.dde import DdeService
@@ -39,6 +39,7 @@ __all__ = [
     # Public entry points
     'AsyncCommenceSession',
     'CommenceSession',
+    'ConditionType',
     'QueryBuilder',
     # Services
     'BackupService',

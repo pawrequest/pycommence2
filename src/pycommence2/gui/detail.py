@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from nicegui import ui
 
-from pycommence2.gui.layout import frame, notify_error, notify_success
+from pycommence2.exceptions import CommenceAmbiguousError, raise_for_id_or_pk
 from pycommence2.gui import state
+from pycommence2.gui.layout import frame, notify_error, notify_success
 
 
 def register() -> None:
@@ -17,20 +18,34 @@ def register() -> None:
             if not state.worker or not state.worker.connected:
                 ui.label('⚠ Not connected to Commence.')
                 return
-            await _render_detail(category, row_id)
+            await _render_detail(category=category, row_id=row_id)
+
+    @ui.page('/detail/pk/{category}/{pk_value}')
+    async def detail_pk(category: str, pk_value: str) -> None:
+        with frame(f'Detail — {category}'):
+            if not state.worker or not state.worker.connected:
+                ui.label('⚠ Not connected to Commence.')
+                return
+            await _render_detail(category=category, pk_value=pk_value)
 
 
-async def _render_detail(category: str, row_id: str) -> None:
+async def _render_detail(*, category: str, row_id: str = '', pk_value: str = '') -> None:
     """Render the record detail view."""
     worker = state.worker
     assert worker is not None
 
     # Load the row data
     try:
-        row = await worker.run(lambda s, c=category, rid=row_id: s.read_by_id(c, rid))
+        if pk_value:
+            row = await worker.run(lambda s, c=category, pk=pk_value: s.read_by_pk(c, pk))
+        elif row_id:
+            row = await worker.run(lambda s, c=category, rid=row_id: s.read_by_id(c, rid))
+        else:
+            raise CommenceAmbiguousError()
+
     except Exception as exc:
         notify_error(f'Failed to load row: {exc}')
-        return
+        raise
 
     # Load field info for type context
     try:
@@ -98,9 +113,9 @@ async def _render_detail(category: str, row_id: str) -> None:
             notify_error(f'Save failed: {exc}')
 
     with ui.row().classes('gap-4 mt-4'):
-        ui.button('Save Changes', icon='save', on_click=save_changes).props('color=primary').bind_enabled_from(
-            state.app_state, 'edit_unlocked'
-        )
+        ui.button('Save Changes', icon='save', on_click=save_changes).props(
+            'color=primary'
+        ).bind_enabled_from(state.app_state, 'edit_unlocked')
 
         # Open in Commence
         async def open_in_commence() -> None:
@@ -132,7 +147,9 @@ async def _render_detail(category: str, row_id: str) -> None:
 
         if pk_value:
             for conn in connections:
-                with ui.expansion(f'{conn.name} → {conn.to_category}', icon='link').classes('w-full'):
+                with ui.expansion(f'{conn.name} → {conn.to_category}', icon='link').classes(
+                    'w-full'
+                ):
                     try:
                         connected_names = await worker.run(
                             lambda s, c=category, pk=pk_value, cn=conn.name, tc=conn.to_category: (
@@ -147,4 +164,6 @@ async def _render_detail(category: str, row_id: str) -> None:
                     except Exception as exc:
                         ui.label(f'  Error: {exc}').classes('text-sm text-red ml-4')
         else:
-            ui.label('Cannot load connections — item name field not found.').classes('text-sm text-grey')
+            ui.label('Cannot load connections — item name field not found.').classes(
+                'text-sm text-grey'
+            )

@@ -569,10 +569,10 @@ def mcp(read_only: bool, transport: str, port: int) -> None:
 
 
 @cli.command()
-@click.option('--no-native', is_flag=True, help='Run as a web app instead of a native window.')
+@click.option('--native', is_flag=True, help='Run as a native window instead of a web app.')
 @click.option('--port', default=0, type=int, help='Server port (0 = auto).')
 @click.option('--reload', is_flag=True, help='Enable hot-reload (for development).')
-def gui(no_native: bool, port: int, reload: bool) -> None:
+def gui(native: bool, port: int, reload: bool) -> None:
     """Launch the NiceGUI desktop frontend.
 
     Opens a native desktop window with a full GUI for browsing,
@@ -588,7 +588,7 @@ def gui(no_native: bool, port: int, reload: bool) -> None:
         raise click.ClickException("The GUI requires the 'gui' extra.  Install with:\n  pip install pycommence2[gui]")
 
     gui_run(
-        native=not no_native,
+        native=native,
         port=port,
         reload=reload,
     )

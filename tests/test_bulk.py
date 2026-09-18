@@ -210,3 +210,66 @@ class TestSessionUpsert:
 
             assert result['added'] == 1
             session._writer.upsert_rows.assert_called_once()
+
+
+class TestSessionLazyServices:
+    """Verify session services are initialized on first access."""
+
+    def test_services_are_created_lazily(self):
+        from pycommence2.session import CommenceSession
+
+        mock_db = MagicMock()
+
+        with (
+            patch('pycommence2.session.CommenceDB', return_value=mock_db),
+            patch('pycommence2.session.SchemaService') as MockSchema,
+            patch('pycommence2.session.ReaderService') as MockReader,
+            patch('pycommence2.session.WriterService') as MockWriter,
+            patch('pycommence2.session.ConnectionService') as MockConnections,
+            patch('pycommence2.session.DdeService') as MockDde,
+            patch('pycommence2.session.ExportService') as MockExport,
+            patch('pycommence2.session.BackupService') as MockBackup,
+            patch('pycommence2.session.ImportService') as MockImport,
+        ):
+            session = CommenceSession()
+
+            MockSchema.assert_not_called()
+            MockReader.assert_not_called()
+            MockWriter.assert_not_called()
+            MockConnections.assert_not_called()
+            MockDde.assert_not_called()
+            MockExport.assert_not_called()
+            MockBackup.assert_not_called()
+            MockImport.assert_not_called()
+
+            assert session.schema is MockSchema.return_value
+            assert session.reader is MockReader.return_value
+            assert session.connections is MockConnections.return_value
+            assert session.dde is MockDde.return_value
+            assert session.export_service is MockExport.return_value
+            assert session.backup_service is MockBackup.return_value
+            assert session.import_service is MockImport.return_value
+
+            MockSchema.assert_called_once_with(mock_db)
+            MockReader.assert_called_once_with(mock_db)
+            MockConnections.assert_called_once_with(mock_db)
+            MockDde.assert_called_once_with(mock_db)
+            MockExport.assert_called_once_with()
+            MockBackup.assert_called_once_with(session)
+            MockImport.assert_called_once_with(session)
+
+            _ = session.schema
+            _ = session.reader
+            _ = session.connections
+            _ = session.dde
+            _ = session.export_service
+            _ = session.backup_service
+            _ = session.import_service
+
+            MockSchema.assert_called_once()
+            MockReader.assert_called_once()
+            MockConnections.assert_called_once()
+            MockDde.assert_called_once()
+            MockExport.assert_called_once()
+            MockBackup.assert_called_once()
+            MockImport.assert_called_once()

@@ -23,7 +23,7 @@ def make_and_execute_q(session, category, columns, filter_builder_, batch_size, 
     qb: QueryBuilder = (session.query(category).columns(*columns).limit(batch_size).with_ids(True)).apply_settings()
     filter_builder_.apply_to(qb)
     rows = []
-    for r in qb.execute(resolve=False, offset=offset):
+    for r in qb.execute(offset=offset):
         d = r.to_dict()
         d['__row_id'] = r.row_id
         rows.append(d)

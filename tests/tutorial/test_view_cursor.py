@@ -21,7 +21,8 @@ class TestQueryView:
             pytest.skip('No Contact views available in Tutorial DB')
 
         view_name = views[0]
-        rows = session.query_view(view_name).limit(5).execute(resolve=True)
+        rows = session.query_view(view_name).limit(5).execute()
+        rows=tuple(rows)
         assert isinstance(rows, tuple)
         for row in rows:
             assert isinstance(row, RowResult)

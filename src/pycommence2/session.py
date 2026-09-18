@@ -34,13 +34,16 @@ Usage::
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from collections.abc import Generator
+from functools import cached_property
+from pathlib import Path
 
+from pycommence2 import SchemaError
 from pycommence2._com.connection import CommenceDB
 from pycommence2._com.constants import CMC_CURSOR_VIEW
-from pycommence2.models import RowResult
-from pycommence2.query import QueryBuilder
+from pycommence2.exceptions import raise_for_id_or_pk, raise_for_one
+from pycommence2.models import FieldType, RowResult
+from pycommence2.query import ConditionType, QueryBuilder
 from pycommence2.services.backup import BackupService
 from pycommence2.services.connections import ConnectionService
 from pycommence2.services.dde import DdeService
@@ -74,14 +77,38 @@ class CommenceSession:
             CommenceNotFoundError: If Commence is not running or no database is open.
         """
         self._db = CommenceDB()
-        self._schema = SchemaService(self._db)
-        self._reader = ReaderService(self._db)
-        self._writer = WriterService(self._db)
-        self._connections = ConnectionService(self._db)
-        self._dde = DdeService(self._db)
-        self._export = ExportService()
-        self._backup = BackupService(self)
-        self._import = ImportService(self)
+
+    @cached_property
+    def _schema(self) -> SchemaService:
+        return SchemaService(self._db)
+
+    @cached_property
+    def _reader(self) -> ReaderService:
+        return ReaderService(self._db)
+
+    @cached_property
+    def _writer(self) -> WriterService:
+        return WriterService(self._db)
+
+    @cached_property
+    def _connections(self) -> ConnectionService:
+        return ConnectionService(self._db)
+
+    @cached_property
+    def _dde(self) -> DdeService:
+        return DdeService(self._db)
+
+    @cached_property
+    def _export(self) -> ExportService:
+        return ExportService()
+
+    @cached_property
+    def _backup(self) -> BackupService:
+        return BackupService(self)
+
+    @cached_property
+    def _import(self) -> ImportService:
+        return ImportService(self)
 
     # -- DB metadata ---------------------------------------------------------
     @property
@@ -173,6 +200,19 @@ class CommenceSession:
             stats = db.backup_service.backup("./backup")
         """
         return self._backup
+
+    @property
+    def reader(self) -> ReaderService:
+        """Access the reader service for reading data.
+
+        Returns:
+            The ``ReaderService`` instance for this session.
+
+        Example::
+
+            item = db.reader.get_item("Contact", "Jane Doe")
+        """
+        return self._reader
 
     @property
     def import_service(self) -> ImportService:
@@ -270,9 +310,8 @@ class CommenceSession:
         logic: str | None = None,
         sort: str | None = None,
         max_rows: int = 200,
-        canonical: bool = False,
-        resolve: bool = True,
-    ) -> Generator[RowResult] | tuple[RowResult, ...]:
+        canonical: bool = True,
+    ) -> Generator[RowResult, None, None]:
         """Read rows from a category with optional filtering/sorting.
 
         Args:
@@ -286,8 +325,6 @@ class CommenceSession:
             canonical: If ``True``, return dates as ``yyyymmdd``, numbers
                 without locale formatting, times as ``hh:mm``, and
                 checkboxes as ``TRUE``/``FALSE``.
-            resolve: If ``True``, return a tuple of results. If ``False``,
-                return the raw generator for streaming/iterative processing.
 
         Returns:
             A list of ``RowResult`` objects, each containing a ``columns``
@@ -308,7 +345,7 @@ class CommenceSession:
             max_rows=max_rows,
             canonical=canonical,
         )
-        return tuple(res) if resolve else res
+        return res
 
     def read_by_id(
         self,
@@ -316,7 +353,7 @@ class CommenceSession:
         row_id: str,
         *,
         columns: list[str] | None = None,
-        canonical: bool = False,
+        canonical: bool = True,
     ) -> RowResult:
         """Read a single row by its unique ID.
 
@@ -580,13 +617,15 @@ class CommenceSession:
             db.export("Account", "data.xlsx", format="excel")
         """
         fmt = format or detect_format(path)
-        rows = self.read(
-            category,
-            columns=columns,
-            filters=filters,
-            logic=logic,
-            max_rows=max_rows,
-            canonical=canonical,
+        rows = list(
+            self.read(
+                category,
+                columns=columns,
+                filters=filters,
+                logic=logic,
+                max_rows=max_rows,
+                canonical=canonical,
+            )
         )
         if fmt == 'csv':
             return self._export.to_csv(rows, path, columns=columns)
@@ -859,3 +898,25 @@ class CommenceSession:
 
     def __repr__(self) -> str:
         return f'<CommenceSession db={self.db_name!r}>'
+
+    def pk_label(self, category) -> str:
+        with self._db.get_cursor(category) as cur:
+            rs = cur.get_query_rowset(1)
+            pk_field_naive = rs.get_column_label(0)
+            field_info = self.schema.get_field_definition(category, pk_field_naive)
+            if field_info.field_type == FieldType.NAME:
+                return pk_field_naive
+            raise SchemaError('First Column not Name Type')
+
+    def read_by_pk(self, category, pk_value) -> RowResult:
+        pk_label = self.pk_label(category=category)
+        res = self.query(category).where(pk_label, ConditionType.EQUAL, pk_value).execute()
+        res = tuple(res)
+        raise_for_one(res)
+        return res[0]
+
+    def read_by_id_or_pk(self, category, row_id: str = '', pk_value: str = '') -> RowResult:
+        raise_for_id_or_pk(row_id, pk_value)
+        if row_id:
+            return self.read_by_id(category, row_id)
+        return self.read_by_pk(category, pk_value)

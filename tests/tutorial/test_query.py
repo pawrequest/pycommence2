@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from pycommence2 import CommenceSession, QueryBuilder, RowResult
+from pycommence2 import CommenceSession, ConditionType, QueryBuilder, RowResult
 from tests.sample_data import CONTACT_ITEM_NAMES
 
 CATEGORY = 'Contact'
@@ -16,7 +16,8 @@ class TestQueryBuilderBasic:
         assert isinstance(qb, QueryBuilder)
 
     def test_execute_returns_rows(self, session: CommenceSession) -> None:
-        rows = session.query(CATEGORY).limit(5).execute(resolve=True)
+        rows = session.query(CATEGORY).limit(5).execute()
+        rows = tuple(rows)
         assert isinstance(rows, tuple)
         assert len(rows) <= 5
         assert all(isinstance(r, RowResult) for r in rows)
@@ -33,6 +34,16 @@ class TestQueryWithFilter:
     def test_where_equal_to(self, session: CommenceSession) -> None:
         rows = (
             session.query(CATEGORY).columns('contactKey', 'firstName').where('firstName', 'Equal To', 'Bill').execute()
+        )
+        assert len(rows) >= 1
+        assert all(r['firstName'] == 'Bill' for r in rows)
+
+    def test_where_accepts_condition_enum(self, session: CommenceSession) -> None:
+        rows = (
+            session.query(CATEGORY)
+            .columns('contactKey', 'firstName')
+            .where('firstName', ConditionType.EQUAL, 'Bill')
+            .execute()
         )
         assert len(rows) >= 1
         assert all(r['firstName'] == 'Bill' for r in rows)

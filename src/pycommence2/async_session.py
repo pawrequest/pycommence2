@@ -144,7 +144,7 @@ class AsyncCommenceSession:
         logic: str | None = None,
         sort: str | None = None,
         max_rows: int = 500,
-        canonical: bool = False,
+        canonical: bool = True,
     ) -> list[RowResult]:
         """Read rows from a category with optional filtering/sorting.
 
@@ -168,7 +168,7 @@ class AsyncCommenceSession:
         row_id: str,
         *,
         columns: list[str] | None = None,
-        canonical: bool = False,
+        canonical: bool = True,
     ) -> RowResult:
         """Read a single row by its unique ID."""
         return await self._dispatcher.run(
@@ -188,7 +188,7 @@ class AsyncCommenceSession:
         filters: list[tuple[str, str, str]] | None = None,
         sort: str | None = None,
         limit: int = 500,
-        canonical: bool = False,
+        canonical: bool = True,
     ) -> list[RowResult]:
         """Build and execute a query in one call.
 

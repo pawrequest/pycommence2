@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 
-from pycommence2.gui import emailer_page
+from pycommence2.gui import emailer_page, actions
 
 log = logging.getLogger(__name__)
 
@@ -44,6 +44,7 @@ def create_app() -> None:
     export_dialog.register()
     dde_console.register()
     emailer_page.register()
+    actions.register()
 
     # Clean shutdown
     app.on_shutdown(lambda: state.worker.stop() if state.worker else None)
@@ -53,10 +54,11 @@ def create_app() -> None:
 
 def run(
     *,
-    native: bool = True,
+    native: bool = False,
     title: str = 'pycommence2',
     port: int = 0,
     reload: bool = False,
+    host: str = '0.0.0.0'
 ) -> None:
     """Create the app and start the NiceGUI server.
 
@@ -65,6 +67,7 @@ def run(
         title: Window title.
         port: Server port (0 = auto-select).
         reload: Enable hot-reload (for development).
+        host: Server host (default '0.0.0.0').
     """
     from nicegui import ui
 
@@ -74,6 +77,7 @@ def run(
         title=title,
         port=port,
         reload=reload,
+        host=host,
         window_size=(1280, 800),
     )
 

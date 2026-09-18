@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
 from collections.abc import Generator
+from functools import cached_property
+from typing import TYPE_CHECKING
 
 from pycommence2._com.constants import BOOKMARK_BEGINNING, CMC_CURSOR_CATEGORY
 from pycommence2.models import RelatedColumn, RowResult
@@ -40,7 +41,7 @@ class ReaderService:
         sort: str | None = None,
         max_rows: int = 500,
         get_ids: bool = True,
-        canonical: bool = False,
+        canonical: bool = True,
         mode: int = CMC_CURSOR_CATEGORY,
         offset=0,
     ) -> Generator[RowResult]:
@@ -141,7 +142,7 @@ class ReaderService:
         row_id: str,
         *,
         columns: list[str] | None = None,
-        canonical: bool = False,
+        canonical: bool = True,
     ) -> RowResult:
         """Read a single row by its unique row ID.
 
@@ -168,7 +169,10 @@ class ReaderService:
                 raise RowsetError(f"No row found for ID '{row_id}' in '{category}'")
 
             labels = rs.column_labels()
-            row_data = {labels[c]: rs.get_row_value(0, c, canonical=canonical) for c in range(rs.column_count)}
+            row_data = {
+                labels[c]: rs.get_row_value(0, c, canonical=canonical)
+                for c in range(rs.column_count)
+            }
             return RowResult(columns=row_data, row_id=row_id)
 
     def count(

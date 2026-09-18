@@ -44,7 +44,7 @@ class RowsetWrapper:
         return val
 
     # -- shared read methods -------------------------------------------------
-    def get_row_value(self, row: int, col: int, canonical: bool = False) -> str:
+    def get_row_value(self, row: int, col: int, canonical: bool = True) -> str:
         flags = CMC_FLAG_CANONICAL if canonical else 0
         val = self._rs.GetRowValue(row, col, flags)
         if val is None:
@@ -86,7 +86,7 @@ class RowsetWrapper:
         row: int,
         col: int,
         filename: str,
-        canonical: bool = False,
+        canonical: bool = True,
     ) -> int:
         """Save a field value to a file.
 

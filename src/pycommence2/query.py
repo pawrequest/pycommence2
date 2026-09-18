@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator
+from enum import StrEnum
 from functools import reduce
 from pathlib import Path
 from typing import TYPE_CHECKING
-from collections.abc import Generator
 
 from pycommence2._com.constants import CMC_CURSOR_CATEGORY
 from pycommence2.config import PycommenceSettings
@@ -13,6 +14,21 @@ from pycommence2.models import RelatedColumn, RowResult
 
 if TYPE_CHECKING:
     from pycommence2.services.reader import ReaderService
+
+
+class ConditionType(StrEnum):
+    EQUAL = 'Equal To'
+    CONTAIN = 'Contains'
+    AFTER = 'After'
+    BETWEEN = 'Is Between'
+    BEFORE = 'Before'
+    NOT_EQUAL = 'Not Equal To'
+    NOT_CONTAIN = "Doesn't Contain"
+    ON = 'On'
+    NOT = 'No'
+
+
+Condition = str | ConditionType
 
 
 class QueryBuilder:
@@ -49,7 +65,7 @@ class QueryBuilder:
         self._sort_pairs: list[tuple[str, str]] = []
         self._max_rows: int = 500
         self._get_ids: bool = True
-        self._canonical: bool = False
+        self._canonical: bool = True
         self._offset: int = 0
 
     # -- column selection ----------------------------------------------------
@@ -72,10 +88,15 @@ class QueryBuilder:
         return self
 
     # -- filtering -----------------------------------------------------------
+    @staticmethod
+    def _format_condition(condition: Condition) -> str:
+        """Normalize a condition value to the literal Commence qualifier."""
+        return condition.value if isinstance(condition, ConditionType) else str(condition)
+
     def where(
         self,
         field: str,
-        qualifier: str,
+        qualifier: Condition,
         value: str = '',
         case_sensitive: bool = False,
     ) -> QueryBuilder:
@@ -104,8 +125,9 @@ class QueryBuilder:
         self._filter_counter += 1
         if self._filter_counter > 4:
             raise ValueError('Commence supports a maximum of 4 filter clauses')
+        normalized_qualifier = self._format_condition(qualifier)
         cs = 'True' if case_sensitive else 'False'
-        clause = f'[ViewFilter({self._filter_counter}, F, , "{field}", "{qualifier}", "{value}", {cs})]'
+        clause = f'[ViewFilter({self._filter_counter}, F, , "{field}", "{normalized_qualifier}", "{value}", {cs})]'
         self._filters.append(clause)
         return self
 
@@ -156,7 +178,7 @@ class QueryBuilder:
         connection_name: str,
         connected_category: str,
         field: str,
-        qualifier: str,
+        qualifier: Condition,
         value: str = '',
         case_sensitive: bool = False,
         *,
@@ -192,11 +214,12 @@ class QueryBuilder:
         if self._filter_counter > 4:
             raise ValueError('Commence supports a maximum of 4 filter clauses')
         nf = 'Not' if not_flag else ''
+        normalized_qualifier = self._format_condition(qualifier)
         cs = 'True' if case_sensitive else 'False'
         clause = (
             f'[ViewFilter({self._filter_counter}, CTCF, {nf}, '
             f'"{connection_name}", "{connected_category}", '
-            f'"{field}", "{qualifier}", "{value}", {cs})]'
+            f'"{field}", "{normalized_qualifier}", "{value}", {cs})]'
         )
         self._filters.append(clause)
         return self
@@ -355,8 +378,8 @@ class QueryBuilder:
 
     # -- execute -------------------------------------------------------------
     def execute(
-        self, resolve: bool = True, apply_settings: bool = False, offset=0
-    ) -> Generator[RowResult] | tuple[RowResult]:
+        self, apply_settings: bool = False, offset=0
+    ) -> Generator[RowResult, None, None]:
         """Run the query and return results.
 
         Assembles the accumulated columns, filters, sort, and options
@@ -401,7 +424,7 @@ class QueryBuilder:
             mode=self._mode,
             offset=offset,
         )
-        return tuple(res) if resolve else res
+        return res
 
     def count(self) -> int:
         """Return only the count of matching rows (without fetching data).
@@ -424,7 +447,9 @@ class QueryBuilder:
 
     def apply_settings(self, toml_path: Path | None = None) -> QueryBuilder:
         settings = (
-            PycommenceSettings.from_toml(toml_path) if toml_path and toml_path.is_file() else PycommenceSettings()
+            PycommenceSettings.from_toml(toml_path)
+            if toml_path and toml_path.is_file()
+            else PycommenceSettings()
         )
 
         sorts = settings.sorts.get(self._category, [])
